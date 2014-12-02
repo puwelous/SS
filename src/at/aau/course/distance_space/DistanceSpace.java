@@ -89,5 +89,54 @@ public class DistanceSpace {
 		return AP/match;
 	}
 
+        /************************ indexing **************************/
+        
+        public double computeIntrinsicDimensionality(){
+            double intrinsicDimensionality;
+            
+            // first randomly choose 2 points and compute
+            int vectorDataIndexToCompare1, vectorDataIndexToCompare2, randIndex1, randIndex2;
+            VectorData vectorDataToCompare1, vectorDataToCompare2;
+            double point1, point2;
+            
+            double avgSigma;
+            double sumOfAllDistances = 0.0;
+            double[] distancesArray = new double[1000];
+            for (int i = 0; i < distancesArray.length; i++) {
+                
+                // take randomly 2 vector representation of images                
+                vectorDataIndexToCompare1 = (int) (Math.random() * this.dataDescriptors.length);
+                vectorDataIndexToCompare2 = (int) (Math.random() * this.dataDescriptors.length);              
+                
 
+                vectorDataToCompare1 = this.dataDescriptors[vectorDataIndexToCompare1];
+                vectorDataToCompare2 = this.dataDescriptors[vectorDataIndexToCompare2];
+                
+                // take randomly 2 their points
+                randIndex1 = (int) (Math.random() * vectorDataToCompare1.getData().length);
+                randIndex2 = (int) (Math.random() * vectorDataToCompare2.getData().length);       
+                
+                point1 =  vectorDataToCompare1.getData()[randIndex1];
+                point2 =  vectorDataToCompare2.getData()[randIndex2];
+                
+                
+                distancesArray[i] = Math.abs(point1 - point2);
+                sumOfAllDistances += distancesArray[i];
+            }
+            
+            avgSigma = sumOfAllDistances / distancesArray.length;
+            
+            // compute sigma^2
+            //sigma^2=SUM(sigmai - avgSigma)^2
+            double sigmaSquared = 0.0;
+            for (int j = 0; j < distancesArray.length; j++) {
+                sigmaSquared += Math.pow((distancesArray[j] - avgSigma), 2);
+            }
+            
+            // mean = sigma
+            
+            intrinsicDimensionality = (Math.pow(avgSigma, 2) / (2*sigmaSquared));
+            
+            return intrinsicDimensionality;
+        }
 }

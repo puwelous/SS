@@ -61,12 +61,6 @@ public class Task {
 
         // take random query object:
         VectorData queryObject = this.queryObjectsList.get(0);
-//		int randIndex = (int) (Math.random() * vectorDataArray.length);
-//        for (int vectorDataIndex = 0; vectorDataIndex < vectorDataArray.length; vectorDataIndex++) {
-//            if (vectorDataArray[vectorDataIndex].id == 542) {
-//                queryObject = vectorDataArray[vectorDataIndex];
-//            }
-//        }
 
         System.out.println("'Randomly' selected query object: "
                 + queryObject.toString());
@@ -74,9 +68,8 @@ public class Task {
         // calculating distances for histogram
         double[] LpNormPValues = new double[]{1, 2, 5, 0.5};
 
-        
         RankedResult[] rankedResults = null;
-                
+
         for (double LpNormValue : LpNormPValues) {
 
             System.out.println("Computing the distance space for p value = "
@@ -99,7 +92,12 @@ public class Task {
         }
 
         System.out.println("... done ...");
-        
+
+        DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
+                vectorDataArray, new LpNorm(2));
+        double iDim = distanceSpaceLpNorm.computeIntrinsicDimensionality();
+        System.out.println("iDim: " + iDim);
+
         return rankedResults;
     }
 

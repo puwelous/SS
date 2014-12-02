@@ -2,7 +2,7 @@ package at.aau.course;
 
 import java.awt.image.BufferedImage;
 
-public class FeatureSignaturCalculator {
+public class FeatureSignatureCalculator {
 
 	final int NUMBER_OF_POINTS = 2000;
 	final int NUMBER_OF_SEEDS = 500;
@@ -15,7 +15,7 @@ public class FeatureSignaturCalculator {
 	
 	//minimal weight = (numberofiteration * 3)
 
-	public FeatureSignaturCalculator(BufferedImage image) {
+	public FeatureSignatureCalculator(BufferedImage image) {
 		this.image = image;
 	}
 
