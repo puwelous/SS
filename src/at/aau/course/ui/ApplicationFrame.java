@@ -2,6 +2,7 @@ package at.aau.course.ui;
 
 import at.aau.course.Task;
 import at.aau.course.distance_space.RankedResult;
+import at.aau.course.extractor.EdgeExtractor;
 import at.aau.course.extractor.GrayScaleHistogram;
 import at.aau.course.extractor.IDescriptorWrapper;
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
@@ -131,11 +132,11 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(UI_GenerateDescriptorFilesCHB)
-                        .addComponent(UI_ComputeDistanceCHB)))
+                        .addComponent(UI_ComputeDistanceCHB))
+                    .addComponent(jLabel1))
                 .addGap(3, 3, 3)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 221, Short.MAX_VALUE)
@@ -258,6 +259,9 @@ public class ApplicationFrame extends javax.swing.JFrame {
                         quantinizations[i]));
             }
         }
+        
+        // adding EdgeExtractor
+        extractors.add(new EdgeExtractor());
 
         return extractors;
     }
