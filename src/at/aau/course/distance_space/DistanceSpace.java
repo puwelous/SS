@@ -56,7 +56,7 @@ public class DistanceSpace {
 		return resultAsList.toArray(new RankedResult[dataDescriptors.length] );
 	}
 	
-	double ComputeMAP(VectorData[] queries){
+	public double computeMAP(VectorData[] queries){
 		double MAP = 0;
 		
 		for (VectorData vectorData : queries) {
@@ -82,10 +82,14 @@ public class DistanceSpace {
 			i++;
 			if( vectorDataClassId ==  rankedResult.getVectorData().getClassId() ){
 				match++;
-				AP += match / i;
+//                                System.out.println("Match: " + match + " and i:" + i);
+//                                System.out.println("Adding match addition: " + (match / i));
+				AP += ((double)match) / i;
 			}
 		}
 		
+                //System.out.println("Matched " + match + " times!");
+                
 		return AP/match;
 	}
 
