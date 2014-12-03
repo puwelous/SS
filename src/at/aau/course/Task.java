@@ -32,7 +32,8 @@ public class Task {
     boolean isDistanceSpaceComputationRequired = false;
     List<IDescriptorWrapper> extractors;
     List<VectorData> queryObjectsList;
-    VectorData[] vectorDataArray = null;
+    //VectorData[] vectorDataArray = null;
+    HashMap<String, List<VectorData>> vectorDataMappedToDescriptors = null;
 
     private EnvironmentPreparationUnit environment = null;
 
@@ -55,7 +56,7 @@ public class Task {
         }
 
         // compute or load descriptors
-        vectorDataArray = this.prepareVectorData();
+        vectorDataMappedToDescriptors = this.prepareVectorData();
 
         this.retrieveQueryObjectsByFiles(queryObjectsAsFiles);
 
@@ -70,34 +71,43 @@ public class Task {
 
         RankedResult[] rankedResults = null;
 
-        for (double LpNormValue : LpNormPValues) {
+        VectorData[] a_vectorDataPerDescriptor;
 
-            System.out.println("Computing the distance space for p value = "
-                    + LpNormValue);
+        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
+            String descriptorFileName = entry.getKey();
+            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
 
-            // initialization
-            DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
-                    vectorDataArray, new LpNorm(LpNormValue));
+            a_vectorDataPerDescriptor = l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]);
 
-            // calculation of distance space
-            rankedResults = distanceSpaceLpNorm
-                    .sortDBAccordingToQuery(queryObject);
+            for (double LpNormValue : LpNormPValues) {
 
-            System.out.println("Distance space computation for p "
-                    + LpNormValue + " finished.");
+                System.out.println("Computing the distance space for p value = "
+                        + LpNormValue + " and descriptor " + descriptorFileName);
 
-            System.out.println(".....publishing results.....");
-            this.publishResults(rankedResults, 10);
-            System.out.println("............................");
+                // initialization
+                DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
+                        a_vectorDataPerDescriptor, new LpNorm(LpNormValue));
+
+                // calculation of distance space
+                rankedResults = distanceSpaceLpNorm
+                        .sortDBAccordingToQuery(queryObject);
+
+                System.out.println("Distance space computation for p "
+                        + LpNormValue + " finished.");
+
+                System.out.println(".....publishing results.....");
+                this.publishResults(rankedResults, 10);
+                System.out.println("............................");
+            }
         }
 
         System.out.println("... done ...");
 
-        DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
-                vectorDataArray, new LpNorm(2));
-        double iDim = distanceSpaceLpNorm.computeIntrinsicDimensionality();
-        System.out.println("iDim: " + iDim);
-
+//TODO: uncomment and modify
+//        DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
+//                vectorDataArray, new LpNorm(2));
+//        double iDim = distanceSpaceLpNorm.computeIntrinsicDimensionality();
+//        System.out.println("iDim: " + iDim);
         return rankedResults;
     }
 
@@ -114,65 +124,79 @@ public class Task {
         }
     }
 
-    private VectorData[] prepareVectorData() throws IOException, Exception {
+    private HashMap<String, List<VectorData>> prepareVectorData() throws IOException, Exception {
 
-        VectorData[] loadedOrComputedVectorData = null;
+        HashMap<String, List<VectorData>> loadedOrComputedVectorData = null;
 
         if (this.isFileGenerationRequired) {
             System.out
                     .println("Descriptors generation has been initialized...");
             loadedOrComputedVectorData = this.generateDescriptors();
             System.out.println("Descriptors generation has been finished...");
-        } else {
+        }
+        else {
             System.out.println("Reloading descriptors has been initialized...");
             loadedOrComputedVectorData = this.reloadDescriptors();
             System.out.println("Reloading descriptors has been finished...");
         }
 
+        System.out.println("****");
+        System.err.println(loadedOrComputedVectorData.get("GrayScaleHistogram_1_4"));
+        System.out.println("****");
+        
         return loadedOrComputedVectorData;
     }
 
-    private VectorData[] reloadDescriptors() throws IOException {
+    private HashMap<String, List<VectorData>> reloadDescriptors() throws IOException {
 
         // get the number of images processed in a file (let's assume the number has not
         // been changed in the meantime
         final int fileCount = this.environment.getFileCountInDir(this.environment.getInputDir());
 
         //List<VectorData> reloadedVectorData = new ArrayList<VectorData>();
-        VectorData[] reloadedDataAsArray = new VectorData[fileCount * this.extractorsCount];
+        HashMap<String, List<VectorData>> reloadedDataMappedToDescriptors = new HashMap<>(this.extractorsCount);
+        //VectorData[] reloadedDataAsArray = new VectorData[fileCount * this.extractorsCount];
 
         String fileNameToReadFrom = null;
         String readedLine = null;
-        int reloadedDataArrayActIndex = 0;
-        VectorData loadedVectorData = null;
+        //int reloadedDataArrayActIndex = 0;
+        List<VectorData> listofVectorDataPerDesc;
 
         for (IDescriptorWrapper iDescriptorWrapper : extractors) {
-
+            
             // retrieve a file name of the file whose descriptor data is saved in
             fileNameToReadFrom = iDescriptorWrapper.getFileName();
 
             BufferedReader br = new BufferedReader(new FileReader(
                     fileNameToReadFrom));
 
+            listofVectorDataPerDesc = new ArrayList<VectorData>();
+            
             while ((readedLine = br.readLine()) != null) {
 
-                if (((reloadedDataArrayActIndex % fileCount) % 1000) == 0) {
-                    System.out.println("Loaded: " + reloadedDataArrayActIndex + " descriptors... Now reading from file " + fileNameToReadFrom);
-                }
+//                if (((reloadedDataArrayActIndex % fileCount) % 1000) == 0) {
+//                    System.out.println("Loaded: " + reloadedDataArrayActIndex + " descriptors... Now reading from file " + fileNameToReadFrom);
+//                }
 
-                loadedVectorData = new VectorData().readFromString(readedLine);
+                listofVectorDataPerDesc.add(new VectorData().readFromString(readedLine));
 
-                reloadedDataAsArray[reloadedDataArrayActIndex] = loadedVectorData;
-                reloadedDataArrayActIndex++;
+//                reloadedDataAsArray[reloadedDataArrayActIndex] = loadedVectorData;
+//                reloadedDataArrayActIndex++;
+                
             }
 
             br.close();
+            
+            System.out.println("Putting into " + iDescriptorWrapper.getFileName() + " List of a size " + listofVectorDataPerDesc.size());
+            
+            // add loaded vector data to a hashmap
+            reloadedDataMappedToDescriptors.put(iDescriptorWrapper.getFileName(), listofVectorDataPerDesc);            
         }
 
-        return reloadedDataAsArray;
+        return reloadedDataMappedToDescriptors;
     }
 
-    private VectorData[] generateDescriptors() throws Exception {
+    private HashMap<String, List<VectorData>> generateDescriptors() throws Exception {
 
         long a = System.currentTimeMillis();
 
@@ -194,11 +218,12 @@ public class Task {
         PrintWriter pwOutDataMapping = new PrintWriter(new FileWriter(
                 this.environment.getMappingFile()));
 
+        HashMap<String, List<VectorData>> mappedVectorDataToDescriptorName = new HashMap<String, List<VectorData>>();
+
         int imageId = 0;
-        int classId = 0;
+        int classId;
 
-        List<VectorData> allVectorDataAsList = new ArrayList<VectorData>();
-
+        //List<VectorData> allVectorDataAsList = new ArrayList<VectorData>();
         final int fileCount = this.environment
                 .getFileCountInDir(this.environment.getInputDir());
 
@@ -208,6 +233,8 @@ public class Task {
         File[] directories = this.environment.getInputDir().listFiles();
 
         BufferedWriter writerToWriteTo = null;
+
+        int actuallyComputedCount = 0;
 
         for (int i = 0; i < directories.length; i++) {
 
@@ -238,9 +265,15 @@ public class Task {
                                 imageFile.getName(),
                                 result);
 
-                        // save to memory
-                        allVectorDataAsList.add(vectorData);
+                        if(!mappedVectorDataToDescriptorName.containsKey(singleExtractor.getFileName())){
+                            mappedVectorDataToDescriptorName.put(singleExtractor.getFileName(), new ArrayList<VectorData>());
+                        }
+                        List<VectorData> vectorDataPerDesc = mappedVectorDataToDescriptorName.get(singleExtractor.getFileName());
+                        vectorDataPerDesc.add(vectorData);
+                        mappedVectorDataToDescriptorName.put(singleExtractor.getFileName(), vectorDataPerDesc);
 
+                        // save to memory
+                        //allVectorDataAsList.add(vectorData);
                         //System.out.println(singleExtractor.getFileName());
                         writerToWriteTo = descriptorsMappedToWriters
                                 .get(singleExtractor.getFileName());
@@ -250,17 +283,18 @@ public class Task {
                         writerToWriteTo.newLine();
                         writerToWriteTo.flush();
 
-                        if (allVectorDataAsList.size() % step == 0) {
-                            System.out.println("Complete: "
-                                    + (allVectorDataAsList.size() / step) + "%");
-                        }
-                    }
 
+                    }
+                        if (actuallyComputedCount % step == 0) {
+                            System.out.println("Complete: "
+                                    + (actuallyComputedCount / step) + "%");
+                        }
                     pwOutDataMapping.println(classId + ";" + imageId + ";"
                             + directoryName + "/" + imageFile.getName());
                     pwOutDataMapping.flush();
 
                     imageId++;
+                    actuallyComputedCount++;
                 }
             } else {
                 System.out.println("File " + directory.getName()
@@ -279,8 +313,9 @@ public class Task {
         pwOutDataMapping.close();
 
 //		System.out.println(System.currentTimeMillis() - a);
-        return allVectorDataAsList.toArray(new VectorData[allVectorDataAsList
-                .size()]);
+//        return allVectorDataAsList.toArray(new VectorData[allVectorDataAsList
+//                .size()]);
+        return mappedVectorDataToDescriptorName;
     }
 
     public static void main(String[] arg) {
@@ -332,21 +367,36 @@ public class Task {
         final int queryObjectClassId = Integer.parseInt(new File(queryObjectAsFile.getParent()).getName());
         final String queryObjectFileName = queryObjectAsFile.getName();
 
+        VectorData queryObjectReferenced = null;
         VectorData queryObjectByFile = new VectorData();
 
         queryObjectByFile.setClassId(queryObjectClassId);
         queryObjectByFile.setFileName(queryObjectFileName);
 
-        for (VectorData generatedVectorData : vectorDataArray) {
-
-            //System.out.println("Comparing: " + generatedVectorData + " AND " +  queryObjectByFile);
-            if (generatedVectorData.equals(queryObjectByFile)) {
-                System.out.println(generatedVectorData + " AND " + queryObjectByFile + " are  equal!");
-                if (!queryObjectsList.contains(generatedVectorData)) {
-                    this.queryObjectsList.add(generatedVectorData);
-                }
+        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
+            //String descriptorFileName = entry.getKey();
+            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
+            int indexOfFound = l_vectorDataPerDescriptor.indexOf(queryObjectByFile);
+            if (indexOfFound == -1) {
+                // found
+                continue;
+            }
+            queryObjectReferenced = l_vectorDataPerDescriptor.get(indexOfFound);
+            if (!queryObjectsList.contains(queryObjectReferenced)) {
+                this.queryObjectsList.add(queryObjectReferenced);
             }
         }
+
+//        for (VectorData generatedVectorData : vectorDataArray) {
+//
+//            //System.out.println("Comparing: " + generatedVectorData + " AND " +  queryObjectByFile);
+//            if (generatedVectorData.equals(queryObjectByFile)) {
+//                System.out.println(generatedVectorData + " AND " + queryObjectByFile + " are  equal!");
+//                if (!queryObjectsList.contains(generatedVectorData)) {
+//                    this.queryObjectsList.add(generatedVectorData);
+//                }
+//            }
+//        }
     }
 
     public void setEnvironment(EnvironmentPreparationUnit epu) {
@@ -354,6 +404,11 @@ public class Task {
     }
 
     private void retrieveQueryObjectsByFiles(List<File> queryObjectsAsFiles) {
+
+//        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
+//            String descriptorFileName = entry.getKey();
+//            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
+//        }
         for (File queryObjectsAsFile : queryObjectsAsFiles) {
             this.addQueryObject(queryObjectsAsFile);
         }
