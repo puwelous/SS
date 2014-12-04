@@ -1,10 +1,11 @@
 package at.aau.course.extractor;
 
+import at.aau.course.Converter;
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.util.List;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GrayScaleHistogram implements IDescriptorWrapper {
 
@@ -77,26 +78,20 @@ public class GrayScaleHistogram implements IDescriptorWrapper {
 			for (int j = rectangle.y; j < rectangle.y + (int) rectangle.getHeight() - 1; j++) {
 
 				// Int grayScale = img.GetPixel(i, j).ToGrayScale()
-				int grayScale = GrayScaleHistogram.colorToGrayScale(new Color(image
+				int grayScale = Converter.colorToGrayScale(new Color(image
 						.getRGB(i, j)));
 
-				// histogram[Min(grayScale * numberOfBins / 256, numberOfBins -
-				// 1)] += 1
-				histogram[Math.min(grayScale * this.numberOfBins / 256,
-						this.numberOfBins - 1)] += 1;
-				// optimization:
+				histogram[Math.min(grayScale * this.numberOfBins / 256, this.numberOfBinsMinusOne)] += 1;
+				// optimized from:
 //				histogram[Math.min(grayScale * numOfBinsDivBy256,
-//						numberOfBinsMinusOne)] += 1;
+//						numberOfBins - 1)] += 1;
 			}
 		}
 
 		return histogram;
 	}
 
-	public static int colorToGrayScale(Color c) {
-		return (int) ((c.getRed() * 0.299) + (c.getGreen() * 0.587) + (c
-				.getBlue() * 0.114));
-	}
+
 
 	@Override
 	public String toString() {
@@ -116,7 +111,4 @@ public class GrayScaleHistogram implements IDescriptorWrapper {
 	public String getFileName() {
 		return this.name + "_" + this.blockCount + "_" + this.numberOfBins;
 	}
-	
-	
-
 }

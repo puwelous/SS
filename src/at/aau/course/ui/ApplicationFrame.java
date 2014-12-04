@@ -2,24 +2,35 @@ package at.aau.course.ui;
 
 import at.aau.course.Task;
 import at.aau.course.VectorData;
+import at.aau.course.distance.IDistance;
+import at.aau.course.distance.LpNorm;
 import at.aau.course.distance_space.RankedResult;
 import at.aau.course.extractor.EdgeExtractor;
 import at.aau.course.extractor.GrayScaleHistogram;
+import at.aau.course.extractor.HSVExtractor;
 import at.aau.course.extractor.IDescriptorWrapper;
+import at.aau.course.ui.Phys.Application;
+
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
 import java.awt.BorderLayout;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import physics_model.PhysicsModel;
 
 public class ApplicationFrame extends javax.swing.JFrame {
 
@@ -60,9 +71,9 @@ public class ApplicationFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         UI_descriptorsList = new javax.swing.JList();
         jLabel1 = new javax.swing.JLabel();
-        UI_ComputeDistanceCHB = new javax.swing.JCheckBox();
         UI_GenerateDescriptorsButton = new javax.swing.JButton();
         UI_LoadDescriptorsFromFileButton = new javax.swing.JButton();
+        UI_ShowPhysicsModelButton = new javax.swing.JButton();
         UI_QueryObjectPanel = new javax.swing.JPanel();
         UI_QueryObjectPath = new javax.swing.JTextField();
         UI_chooseQueryObjectButton = new javax.swing.JButton();
@@ -87,6 +98,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_1stFeatureExtractorShowButton = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         UI_1stFeatureDescriptorImagePanel = new javax.swing.JPanel();
+        jSeparator2 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Similarity Search Project");
@@ -94,8 +106,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
         jScrollPane1.setViewportView(UI_descriptorsList);
 
         jLabel1.setText("Choose descriptors:");
-
-        UI_ComputeDistanceCHB.setText("Compute distance");
 
         UI_GenerateDescriptorsButton.setText("Generate");
         UI_GenerateDescriptorsButton.addActionListener(new java.awt.event.ActionListener() {
@@ -111,6 +121,13 @@ public class ApplicationFrame extends javax.swing.JFrame {
             }
         });
 
+        UI_ShowPhysicsModelButton.setText("Show Physics Model");
+        UI_ShowPhysicsModelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UI_ShowPhysicsModelButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout UI_PanelDescriptorsGenerationLayout = new javax.swing.GroupLayout(UI_PanelDescriptorsGeneration);
         UI_PanelDescriptorsGeneration.setLayout(UI_PanelDescriptorsGenerationLayout);
         UI_PanelDescriptorsGenerationLayout.setHorizontalGroup(
@@ -121,19 +138,18 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addComponent(UI_GenerateDescriptorsButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_LoadDescriptorsFromFileButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 595, Short.MAX_VALUE)
-                .addComponent(UI_ComputeDistanceCHB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(UI_ShowPhysicsModelButton))
             .addComponent(jScrollPane1)
         );
         UI_PanelDescriptorsGenerationLayout.setVerticalGroup(
             UI_PanelDescriptorsGenerationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(UI_PanelDescriptorsGenerationLayout.createSequentialGroup()
-                .addGroup(UI_PanelDescriptorsGenerationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(UI_ComputeDistanceCHB)
-                    .addGroup(UI_PanelDescriptorsGenerationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel1)
-                        .addComponent(UI_GenerateDescriptorsButton)
-                        .addComponent(UI_LoadDescriptorsFromFileButton)))
+                .addGroup(UI_PanelDescriptorsGenerationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(UI_GenerateDescriptorsButton)
+                    .addComponent(UI_LoadDescriptorsFromFileButton)
+                    .addComponent(UI_ShowPhysicsModelButton))
                 .addGap(3, 3, 3)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
@@ -224,7 +240,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_2ndFeatureDescriptorImagePanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         UI_2ndFeatureDescriptorImagePanel.setForeground(new java.awt.Color(240, 240, 240));
         UI_2ndFeatureDescriptorImagePanel.setPreferredSize(new java.awt.Dimension(0, 144));
-        UI_2ndFeatureDescriptorImagePanel.setLayout(new java.awt.GridLayout());
+        UI_2ndFeatureDescriptorImagePanel.setLayout(new java.awt.GridLayout(1, 0));
         jScrollPane4.setViewportView(UI_2ndFeatureDescriptorImagePanel);
 
         javax.swing.GroupLayout UI_2ndFeatureDescriptorPanelLayout = new javax.swing.GroupLayout(UI_2ndFeatureDescriptorPanel);
@@ -290,7 +306,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addComponent(UI_1stLpNormComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(UI_1stFeatureExtractorShowButton)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 333, Short.MAX_VALUE))
             .addComponent(jSeparator3)
             .addComponent(jScrollPane3)
         );
@@ -320,14 +336,17 @@ public class ApplicationFrame extends javax.swing.JFrame {
                     .addComponent(UI_PanelDescriptorsGeneration, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(UI_2ndFeatureDescriptorPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(UI_1stFeatureDescriptorPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(UI_1stFeatureDescriptorPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(UI_PanelDescriptorsGeneration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(2, 2, 2)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_QueryObjectPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -360,8 +379,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
             this.descriptsMapped2Name = newTask.getVectorDataMappedToDescriptors();
 
-            System.out.println(descriptsMapped2Name.size());
-
             JOptionPane.showMessageDialog(this, "Descriptors generation finished!");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
@@ -386,8 +403,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
             newTask.reloadDescriptors();
 
             this.descriptsMapped2Name = newTask.getVectorDataMappedToDescriptors();
-
-            System.out.println(descriptsMapped2Name.size());
 
             JOptionPane.showMessageDialog(this, "Loading descriptors finished!");
         } catch (Exception ex) {
@@ -505,7 +520,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
         List<IDescriptorWrapper> descriptionWrappers = (List<IDescriptorWrapper>) this.UI_descriptorsList.getSelectedValuesList();
 
-        if (descriptionWrappers.isEmpty()) {
+        if ( descriptionWrappers == null || descriptionWrappers.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No feature extractor (descriptor) selected!");
             return;
         }
@@ -559,6 +574,46 @@ public class ApplicationFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_UI_2ndFeatureExtractorShowButtonActionPerformed
 
+    private void UI_ShowPhysicsModelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UI_ShowPhysicsModelButtonActionPerformed
+
+        if ( this.descriptsMapped2Name == null || this.descriptsMapped2Name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No feature extractor (descriptor) selected!");
+            return;
+        }
+        
+        PhysicsModel physicsModel = new PhysicsModel();
+        
+        IDistance distance = new LpNorm(2);
+        
+        VectorData[] objectsPerFeature = null;
+        
+        List<VectorData> vectorDataAsList = new ArrayList<VectorData>();
+        
+        for (Map.Entry<String, List<VectorData>> entry : this.descriptsMapped2Name.entrySet()) {
+           vectorDataAsList.addAll(entry.getValue()); 
+        }        
+        
+        objectsPerFeature = vectorDataAsList.toArray(new VectorData[vectorDataAsList.size()]);
+        
+        Point[] coordinates = physicsModel.computeCoordinates(distance, objectsPerFeature);
+        
+        //double[][] distanceMetrics = physicsModel.getDistanceMatrix();
+        
+        System.out.println(coordinates.length);
+        System.out.println(Arrays.toString(coordinates));
+        
+        try {
+            //new PhysicsModelUI( coordinates, objectsPerFeature, this.epu.getInputDir() );
+            //new Application(coordinates, objectsPerFeature, this.epu.getInputDir());
+            System.out.println("Application()");
+            //System.out.println(new Application());
+             new Thread(new Application()).start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+    }//GEN-LAST:event_UI_ShowPhysicsModelButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel UI_1stFeatureDescriptorImagePanel;
@@ -573,13 +628,13 @@ public class ApplicationFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox UI_2ndLpNormComboBox;
     private javax.swing.JLabel UI_ActualQueryObjectLabel;
     private javax.swing.JLabel UI_ChooseQueryObjectLabel;
-    protected javax.swing.JCheckBox UI_ComputeDistanceCHB;
     private javax.swing.JButton UI_GenerateDescriptorsButton;
     private javax.swing.JButton UI_LoadDescriptorsFromFileButton;
     private javax.swing.JPanel UI_PanelDescriptorsGeneration;
     private javax.swing.JPanel UI_QueryObjectPanel;
     private javax.swing.JTextField UI_QueryObjectPath;
     private javax.swing.JList UI_QueryObjectsList;
+    private javax.swing.JButton UI_ShowPhysicsModelButton;
     private javax.swing.JButton UI_addQueryObjectButton;
     private javax.swing.JButton UI_chooseQueryObjectButton;
     protected javax.swing.JList UI_descriptorsList;
@@ -591,6 +646,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     // End of variables declaration//GEN-END:variables
 
@@ -633,16 +689,20 @@ public class ApplicationFrame extends javax.swing.JFrame {
         // adding EdgeExtractor
         extractors.add(new EdgeExtractor());
 
+        for (int i = 0; i < quantinizations.length; i++) {
+            for (int j = 0; j < dimensions.length; j++) {
+
+                // adding HSVExtractor
+                extractors.add((IDescriptorWrapper) new HSVExtractor(
+                        dimensions[j],
+                        quantinizations[i]));
+            }
+        }        
+    
         return extractors;
     }
 
-//    private void initQueryObjectsList(List<File> queryObjects) {
-//        //this.UI_QueryObjectsList.setModel(new QueryObjectsAsFilesListModel(queryObjects));
-//
-//        listModel = new DefaultListModel();
-//        listModel.addElement("");
-//        UI_QueryObjectsList = new JList(listModel);
-//    }
+    
     private List<File> initQueryObjects() {
         // no init, return empty array(list)
         return new ArrayList<>();

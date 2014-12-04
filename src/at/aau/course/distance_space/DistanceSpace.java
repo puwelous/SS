@@ -56,14 +56,20 @@ public class DistanceSpace {
 		return resultAsList.toArray(new RankedResult[dataDescriptors.length] );
 	}
 	
-	public double computeMAP(VectorData[] queries){
+        /**
+         * How relevant is the descriptor?
+         * For all descriptors calculate relevance separately.
+         * @param descriptors Whole set of descriptors.
+         * @return 
+         */
+	public double computeMAP(VectorData[] descriptors){
 		double MAP = 0;
 		
-		for (VectorData vectorData : queries) {
+		for (VectorData vectorData : descriptors) {
 			MAP += avgPrecisionAsSum(vectorData);
 		}
 		
-		return (MAP / queries.length);
+		return (MAP / descriptors.length);
 	}
 
 	private double avgPrecisionAsSum(VectorData vectorData) {
