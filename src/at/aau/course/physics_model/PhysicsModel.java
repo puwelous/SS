@@ -6,9 +6,9 @@ import java.awt.Point;
 
 public class PhysicsModel {
 
-    private static final int INITIAL_ITERATION_COUNT = 1000;
-    private static final double REPULSION_FORCE = 1.5;
-    private static final double ATTRACTION_FORCE = 1000;
+    private static final int INITIAL_ITERATION_COUNT = 100; // 10000
+    private static final double REPULSION_FORCE = 5;
+    private static final double ATTRACTION_FORCE = 100;
 
     double[][] distanceMatrix;
 
@@ -84,10 +84,12 @@ public class PhysicsModel {
                 unitVector[0] = vectorV[0] / vectorV[2];
                 unitVector[1] = vectorV[1] / vectorV[2];
 
-                repulse(coordinates[i], coordinates[j], unitVector, REPULSION_FORCE);
+                if( vectorV[2] < 150 ){
+                    repulse(coordinates[i], coordinates[j], unitVector, REPULSION_FORCE);
+                }
 
                 if (distanceMatrix[i][j] > threshold) {
-                    attract(coordinates[i], coordinates[j], unitVector, (distanceMatrix[i][j] / maximum)*ATTRACTION_FORCE);
+                    attract(coordinates[i], coordinates[j], unitVector, (1 - (distanceMatrix[i][j] / maximum))*ATTRACTION_FORCE);
                 }
             }
         }
