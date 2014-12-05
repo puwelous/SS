@@ -28,7 +28,7 @@ class CanvasPanel extends JPanel {
     int recomputed = 1;
 
     public CanvasPanel(PhysicsModel physicsModel, Color background, int objectCount, VectorData[] vectorData, File inputDir) throws IOException {
-
+        setSize(physicsModel.getWidthBound(), physicsModel.getHeightBound());
         this.physicsModel = physicsModel;
         this.coordinates = this.physicsModel.computeCoordinates(new LpNorm(2.0), vectorData);
 
@@ -66,26 +66,22 @@ class CanvasPanel extends JPanel {
 
         setBackground(background);
         
-        System.out.println("Coord before" + Arrays.toString(coordinates));
-        if( recomputed <= 100 ){
+//        System.out.println("Coord before" + Arrays.toString(coordinates));
+//        if( recomputed <= 100 ){
             this.coordinates = this.physicsModel.recomputeCoordinates(this.coordinates);
-            recomputed++;
-        }
-        System.out.println("Coord after" + Arrays.toString(coordinates));         
+//            recomputed++;
+//        }
+//        System.out.println("Coord after" + Arrays.toString(coordinates));         
         
         for (int i = 0; (i < coordinates.length && i < this.renderedImageCount); i++) {
             Point updatedPoint = coordinates[i];
+//            if(i==0){
+//                g.drawImage(icons[i], physicsModel.getWidthBound()/2, physicsModel.getWidthBound()/2, 192/8, 144/8, null);
+//                continue;
+//            }
             //g.drawImage(icons[i], updatedPoint.x, updatedPoint.y, icons[i].getWidth(null), icons[i].getHeight(null),  null);
-            g.drawImage(icons[i], updatedPoint.x, updatedPoint.y, 192/4, 144/4, null);
+            g.drawImage(icons[i], updatedPoint.x, updatedPoint.y, 192/8, 144/8, null);
         }
-        
-       
-
-//        for (int i = 0; i < objects.length; i++) {
-//            g.drawImage(icons[0], objects[i].x, objects[i].y, 50, 50, null);
-//            objects[i].x += deltas[i].x;
-//            objects[i].y += deltas[i].y;
-//        }
     }
 
 }

@@ -582,7 +582,11 @@ public class ApplicationFrame extends javax.swing.JFrame {
         }
 
         PhysicsModel physicsModel = new PhysicsModel();
-
+//        physicsModel.setWidthBound(1280);
+//        physicsModel.setHeightBound(800);
+        physicsModel.setWidthBound(1280);
+        physicsModel.setHeightBound(800);        
+        
         //IDistance distance = new LpNorm(2);
 
         VectorData[] objectsPerFeature = null;

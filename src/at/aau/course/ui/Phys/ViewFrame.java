@@ -2,6 +2,7 @@ package at.aau.course.ui.Phys;
 
 import at.aau.course.VectorData;
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JFrame;
@@ -9,24 +10,23 @@ import physics_model.PhysicsModel;
 
 class ViewFrame extends JFrame {
 
-    VectorData[] vectorData;
-    File inputDir;
-    PhysicsModel physicsModel;
+    final VectorData[] vectorData;
+    final File inputDir;
+    final PhysicsModel physicsModel;
+    final int width;
+    final int height;
 
-    public void setVectorData(VectorData[] vectorData) {
+     public ViewFrame(VectorData[] vectorData, File inputDir, PhysicsModel physicsModel) {
         this.vectorData = vectorData;
-    }
-
-    public void setInputDir(File inputDir) {
         this.inputDir = inputDir;
+        this.physicsModel = physicsModel;
+        this.width = physicsModel.getWidthBound();
+        this.height = physicsModel.getHeightBound();
     }
 
-    void setPhysicsModel(PhysicsModel physicsModel) {
-        this.physicsModel = physicsModel;
-    }
 
     public void build(Color background, int objectCount) throws IOException {
-        setSize(800, 600);
+        setSize(width, height);
         setContentPane(new CanvasPanel(this.physicsModel,background, objectCount, vectorData, inputDir));
     }
 }

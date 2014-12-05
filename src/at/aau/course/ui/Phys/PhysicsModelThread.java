@@ -19,10 +19,8 @@ public class PhysicsModelThread implements Runnable {
 
     @Override
     public void run() {
-        ViewFrame view = new ViewFrame();
-        view.setPhysicsModel(physicsModel);
-        view.setVectorData(vectorData);
-        view.setInputDir(inputDir);
+        ViewFrame view = new ViewFrame(vectorData, inputDir, physicsModel);
+        
         try {
             view.build(Color.white, 15);
         } catch (Exception e) {
@@ -33,7 +31,7 @@ public class PhysicsModelThread implements Runnable {
 
         //Kluge; time to get images read/rendered
         try {
-            Thread.sleep(3000);
+            Thread.sleep(1500);
             //view.repaint();
         } catch (InterruptedException ie) {
         }
@@ -41,7 +39,7 @@ public class PhysicsModelThread implements Runnable {
         for (;;) {
             //Prompt.forString("Press enter to move (hold down for animation)");
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1500);
                 view.repaint();
             } catch (InterruptedException ie) {
             }

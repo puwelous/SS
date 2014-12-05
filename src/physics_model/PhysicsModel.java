@@ -6,14 +6,15 @@ import java.awt.Point;
 
 public class PhysicsModel {
 
-    private static final int INITIAL_ITERATION_COUNT = 1;
-    private static final double REPULSION_FORCE = 1.005;
-    private static final double ATTRACTION_FORCE = 1.5;
+    private static final int INITIAL_ITERATION_COUNT = 100;
+    private static final double REPULSION_FORCE = 1.5;
+    private static final double ATTRACTION_FORCE = 1000;
 
     double[][] distanceMatrix;
-    
+
     int widthBound;
     int heightBound;
+    double maximum;
 
     public PhysicsModel() {
     }
@@ -29,31 +30,29 @@ public class PhysicsModel {
 
         //double[][] distanceMatrix;
         final double threshold;
-        final double maximum;
 
         this.distanceMatrix = computeMatrix(distance, objects);
-        maximum = findMaximum(distanceMatrix);
-        threshold = (maximum * 0.2); // 50%
+        this.maximum = findMaximum(distanceMatrix);
+        threshold = (maximum * 0.5); // 10%
         distanceMatrix = pruneMatrix(distanceMatrix, threshold);
-        
-        for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < 100; j++) {
-                System.out.format("%7.1f", distanceMatrix[i][j]);
-                System.out.print(" ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-        
+
+//        for (int i = 0; i < 100; i++) {
+//            for (int j = 0; j < 100; j++) {
+//                System.out.format("%7.1f", distanceMatrix[i][j]);
+//                System.out.print(" ");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
         Point[] coordinates = new Point[objects.length];
 
-        coordinates = initCoordinatesRandomly(coordinates, 800, 600);
-        //coordinates = initCoordinatesAlongCanvasCenter(coordinates, 800, 600);
+        coordinates = initCoordinatesRandomly(coordinates, widthBound, heightBound);
+        //coordinates = initCoordinatesAlongCanvasCenter(coordinates, widthBound, heightBound);
         System.out.println(java.util.Arrays.toString(coordinates));
 
-//        for (int iterations = 0; iterations < INITIAL_ITERATION_COUNT; iterations++) {
-//
-//            recomputeCoordinates(coordinates);
+        for (int iterations = 0; iterations < INITIAL_ITERATION_COUNT; iterations++) {
+
+            coordinates = recomputeCoordinates(coordinates);
 //            for (int i = 0; i < coordinates.length; i++) {
 //                for (int j = i + 1; j < coordinates.length; j++) {
 //
@@ -66,7 +65,7 @@ public class PhysicsModel {
 //                    }
 //                }
 //            }
-//        }
+        }
 //
 //        System.out.println(java.util.Arrays.toString(coordinates));
         //System.exit(-1);
@@ -79,10 +78,6 @@ public class PhysicsModel {
         for (int i = 0; i < coordinates.length; i++) {
             for (int j = i + 1; j < coordinates.length; j++) {
 
-//                if (showAmount > 0) {
-//                    System.out.println(coordinates[i] + " " + coordinates[j]);
-//                }
-
                 double[] vectorV = computeVector(coordinates[i], coordinates[j]);
                 double[] unitVector = new double[2];
                 unitVector[0] = vectorV[0] / vectorV[2];
@@ -91,15 +86,13 @@ public class PhysicsModel {
                 repulse(coordinates[i], coordinates[j], unitVector, REPULSION_FORCE);
 
                 if (distanceMatrix[i][j] > 0.0) {
-                    attract(coordinates[i], coordinates[j], unitVector, ATTRACTION_FORCE);
+                    attract(coordinates[i], coordinates[j], unitVector, (distanceMatrix[i][j] / maximum)*ATTRACTION_FORCE);
                 }
-
-//                if (showAmount > 0) {
-//                    System.out.println(coordinates[i] + " " + coordinates[j]);
-//                    showAmount--;
-//                }
             }
         }
+
+        coordinates = optimizeCoordinatesToFitScreen(coordinates, this.widthBound, this.heightBound);
+
         return coordinates;
     }
 
@@ -216,17 +209,102 @@ public class PhysicsModel {
 
         return coordinates;
     }
-    
-    
+
     public void setWidthBound(int widthBound) {
         this.widthBound = widthBound;
     }
 
     public void setHeightBound(int heightBound) {
         this.heightBound = heightBound;
-    }    
-    
+    }
+
+    public int getWidthBound() {
+        return widthBound;
+    }
+
+    public int getHeightBound() {
+        return heightBound;
+    }
+
     double[][] getDistanceMatrix() {
         return distanceMatrix;
+    }
+
+    private Point[] optimizeCoordinatesToFitScreen(Point[] coordinates, final int screenWidth, final int screenHeight) {
+
+        // maximum distances between the centre of a screen and Points
+        int Xmax = 0;
+        int Ymax = 0;
+
+        // temp distances
+        int absDistanceX = 0;
+        int absDistanceY = 0;
+
+        // ratios for X and Y scale
+        double Xratio;
+        double Yratio;
+
+        final Point centreOfTheScreen = new Point((int) screenWidth / 2, (int) screenHeight / 2);
+
+        //System.out.println(centreOfTheScreen);
+        for (final Point point : coordinates) {
+
+            if (point.x > screenWidth) {
+                absDistanceX = point.x - centreOfTheScreen.x;
+            } else if (point.x < 0) {
+                absDistanceX = centreOfTheScreen.x - point.x; // centreOfTheScreen.x + |point.x|; 400 - (-20)
+            }
+
+            if (point.y > screenHeight) {
+                absDistanceY = point.y - centreOfTheScreen.y;
+            } else if (point.y < 0) {
+                absDistanceY = centreOfTheScreen.y - point.y; // centreOfTheScreen.y + |point.y|; 400 - (-20)
+            }
+
+            //absDistanceX = Math.abs(Math.abs(point.x) - centreOfTheScreen.x);
+            //absDistanceY = Math.abs(Math.abs(point.y) - centreOfTheScreen.y);
+            if (absDistanceX > Xmax) {
+                Xmax = absDistanceX;
+            }
+            if (absDistanceY > Ymax) {
+                Ymax = absDistanceY;
+            }
+        }
+
+        // return if max distances do not exceed the screen size
+        if ((Xmax < (int) screenWidth / 2) || (Ymax < (int) screenHeight / 2)) {
+            return coordinates;
+        }
+
+        // compute ratio
+        Xratio = ((double) screenWidth / 2) / Xmax;
+        Yratio = ((double) screenHeight / 2) / Ymax;
+
+        // use ratios to shorten distances
+        for (Point point : coordinates) {
+            point.x = (point.x > centreOfTheScreen.x ? centreOfTheScreen.x - (int) (point.x * Xratio) : centreOfTheScreen.x + (int) (point.x * Xratio));
+            point.y = (point.y > centreOfTheScreen.y ? centreOfTheScreen.y - (int) (point.y * Yratio) : centreOfTheScreen.y + (int) (point.y * Yratio));
+
+            if (point.x > (int) screenWidth || point.y > (int) screenHeight) {
+                System.out.println("Crazy!");
+                System.out.println("screenWidth!" + screenWidth);
+                System.out.println("screenHeight!" + screenHeight);
+                System.out.println("Xmax!" + Xmax);
+                System.out.println("Ymax!" + Ymax);
+                System.out.println("Xratio!" + Xratio);
+                System.out.println("Yratio!" + Yratio);
+                System.exit(-1);
+            }
+
+            // corners
+            if (point.x + 192 / 8 > screenWidth) {
+                point.x = point.x - (192 / 8);
+            }
+            if (point.y + 144/8 > screenHeight) {
+                point.y = point.y - (144 / 8);
+            }
+        }
+
+        return coordinates;
     }
 }
