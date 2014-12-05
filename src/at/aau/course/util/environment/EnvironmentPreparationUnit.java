@@ -17,12 +17,15 @@ public class EnvironmentPreparationUnit {
     private final File MAPPING_FILE;
 
     private final File PIVOT_TABLE_FILE;
+    
+    private final File QUERY_OBJECTS_CSV_FILE;
 
     public EnvironmentPreparationUnit() {
         INPUT_DIR = new File(userDirSeparatorIncluded + "aloi_big");
         MAPPING_FILE = new File(userDirSeparatorIncluded + "map.txt");
         VECTOR_DATA_FILES = new HashMap<String, File>();
         PIVOT_TABLE_FILE = new File(userDirSeparatorIncluded + "pivot_table.txt");
+        QUERY_OBJECTS_CSV_FILE = new File(userDirSeparatorIncluded + "QueryList.csv");
     }
 
     public void prepareEnvironment(boolean isFileGenerationRequired, List<IDescriptorWrapper> descriptorWrappers)
@@ -78,6 +81,10 @@ public class EnvironmentPreparationUnit {
     public File getPivotTableFile() {
         return PIVOT_TABLE_FILE;
     }    
+    
+    public File getQueryObjectsCVSFile(){
+        return QUERY_OBJECTS_CSV_FILE;
+    }
 
     public int getFileCountInDir(File scannedDir) {
         int count = 0;
