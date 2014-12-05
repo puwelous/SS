@@ -9,7 +9,7 @@ import at.aau.course.extractor.EdgeExtractor;
 import at.aau.course.extractor.GrayScaleHistogram;
 import at.aau.course.extractor.HSVExtractor;
 import at.aau.course.extractor.IDescriptorWrapper;
-import at.aau.course.ui.Phys.Application;
+import at.aau.course.ui.Phys.PhysicsModelThread;
 
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
 import java.awt.BorderLayout;
@@ -520,7 +520,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
         List<IDescriptorWrapper> descriptionWrappers = (List<IDescriptorWrapper>) this.UI_descriptorsList.getSelectedValuesList();
 
-        if ( descriptionWrappers == null || descriptionWrappers.isEmpty()) {
+        if (descriptionWrappers == null || descriptionWrappers.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No feature extractor (descriptor) selected!");
             return;
         }
@@ -576,42 +576,35 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
     private void UI_ShowPhysicsModelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UI_ShowPhysicsModelButtonActionPerformed
 
-        if ( this.descriptsMapped2Name == null || this.descriptsMapped2Name.isEmpty()) {
+        if (this.descriptsMapped2Name == null || this.descriptsMapped2Name.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No feature extractor (descriptor) selected!");
             return;
         }
-        
+
         PhysicsModel physicsModel = new PhysicsModel();
-        
-        IDistance distance = new LpNorm(2);
-        
+
+        //IDistance distance = new LpNorm(2);
+
         VectorData[] objectsPerFeature = null;
-        
+
         List<VectorData> vectorDataAsList = new ArrayList<VectorData>();
-        
+
         for (Map.Entry<String, List<VectorData>> entry : this.descriptsMapped2Name.entrySet()) {
-           vectorDataAsList.addAll(entry.getValue()); 
-        }        
-        
+            vectorDataAsList.addAll(entry.getValue());
+        }
+
         objectsPerFeature = vectorDataAsList.toArray(new VectorData[vectorDataAsList.size()]);
-        
-        Point[] coordinates = physicsModel.computeCoordinates(distance, objectsPerFeature);
-        
-        //double[][] distanceMetrics = physicsModel.getDistanceMatrix();
-        
-        System.out.println(coordinates.length);
-        System.out.println(Arrays.toString(coordinates));
-        
+
+        //Point[] coordinates = physicsModel.computeCoordinates(distance, objectsPerFeature);
+
         try {
             //new PhysicsModelUI( coordinates, objectsPerFeature, this.epu.getInputDir() );
             //new Application(coordinates, objectsPerFeature, this.epu.getInputDir());
-            System.out.println("Application()");
-            //System.out.println(new Application());
-             new Thread(new Application()).start();
+            PhysicsModelThread physicsModelThread = new PhysicsModelThread(physicsModel, objectsPerFeature, this.epu.getInputDir());
+            new Thread(physicsModelThread).start();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        
     }//GEN-LAST:event_UI_ShowPhysicsModelButtonActionPerformed
 
 
@@ -697,12 +690,11 @@ public class ApplicationFrame extends javax.swing.JFrame {
                         dimensions[j],
                         quantinizations[i]));
             }
-        }        
-    
+        }
+
         return extractors;
     }
 
-    
     private List<File> initQueryObjects() {
         // no init, return empty array(list)
         return new ArrayList<>();

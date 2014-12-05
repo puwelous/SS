@@ -357,7 +357,7 @@ public class Task {
 
             br.close();
 
-            System.out.println("Putting into " + iDescriptorWrapper.getFileName() + " List of a size " + listofVectorDataPerDesc.size());
+            //System.out.println("Putting into " + iDescriptorWrapper.getFileName() + " List of a size " + listofVectorDataPerDesc.size());
 
             // add loaded vector data to a hashmap
             reloadedDataMappedToDescriptors.put(iDescriptorWrapper.getFileName(), listofVectorDataPerDesc);
