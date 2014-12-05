@@ -6,7 +6,7 @@ import java.awt.Point;
 
 public class PhysicsModel {
 
-    private static final int INITIAL_ITERATION_COUNT = 100;
+    private static final int INITIAL_ITERATION_COUNT = 1000;
     private static final double REPULSION_FORCE = 1.5;
     private static final double ATTRACTION_FORCE = 1000;
 
@@ -15,6 +15,7 @@ public class PhysicsModel {
     int widthBound;
     int heightBound;
     double maximum;
+    double threshold;
 
     public PhysicsModel() {
     }
@@ -29,7 +30,7 @@ public class PhysicsModel {
     public Point[] computeCoordinates(IDistance distance, VectorData[] objects) {
 
         //double[][] distanceMatrix;
-        final double threshold;
+        //threshold;
 
         this.distanceMatrix = computeMatrix(distance, objects);
         this.maximum = findMaximum(distanceMatrix);
@@ -85,7 +86,7 @@ public class PhysicsModel {
 
                 repulse(coordinates[i], coordinates[j], unitVector, REPULSION_FORCE);
 
-                if (distanceMatrix[i][j] > 0.0) {
+                if (distanceMatrix[i][j] > threshold) {
                     attract(coordinates[i], coordinates[j], unitVector, (distanceMatrix[i][j] / maximum)*ATTRACTION_FORCE);
                 }
             }

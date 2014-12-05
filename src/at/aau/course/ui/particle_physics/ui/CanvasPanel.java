@@ -80,7 +80,7 @@ class CanvasPanel extends JPanel {
 //                continue;
 //            }
             //g.drawImage(icons[i], updatedPoint.x, updatedPoint.y, icons[i].getWidth(null), icons[i].getHeight(null),  null);
-            g.drawImage(icons[i], updatedPoint.x, updatedPoint.y, 192/8, 144/8, null);
+            g.drawImage(icons[i], updatedPoint.x, updatedPoint.y, 192/4, 144/4, null);
         }
     }
 
