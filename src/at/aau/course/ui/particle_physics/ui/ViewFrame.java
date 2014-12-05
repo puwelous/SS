@@ -1,14 +1,13 @@
-package at.aau.course.ui.Phys;
+package at.aau.course.ui.particle_physics.ui;
 
 import at.aau.course.VectorData;
 import java.awt.Color;
-import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JFrame;
-import physics_model.PhysicsModel;
+import at.aau.course.physics_model.PhysicsModel;
 
-class ViewFrame extends JFrame {
+public class ViewFrame extends JFrame {
 
     final VectorData[] vectorData;
     final File inputDir;

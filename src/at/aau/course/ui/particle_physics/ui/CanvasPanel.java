@@ -1,4 +1,4 @@
-package at.aau.course.ui.Phys;
+package at.aau.course.ui.particle_physics.ui;
 
 import at.aau.course.VectorData;
 import at.aau.course.distance.LpNorm;
@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import javax.swing.JPanel;
-import physics_model.PhysicsModel;
+import at.aau.course.physics_model.PhysicsModel;
 
 class CanvasPanel extends JPanel {
 

@@ -1,9 +1,10 @@
-package at.aau.course.ui.Phys;
+package at.aau.course.ui.particle_physics;
 
+import at.aau.course.ui.particle_physics.ui.ViewFrame;
 import at.aau.course.VectorData;
 import java.awt.Color;
 import java.io.File;
-import physics_model.PhysicsModel;
+import at.aau.course.physics_model.PhysicsModel;
 
 public class PhysicsModelThread implements Runnable {
 

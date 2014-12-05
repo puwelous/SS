@@ -2,35 +2,29 @@ package at.aau.course.ui;
 
 import at.aau.course.Task;
 import at.aau.course.VectorData;
-import at.aau.course.distance.IDistance;
-import at.aau.course.distance.LpNorm;
 import at.aau.course.distance_space.RankedResult;
 import at.aau.course.extractor.EdgeExtractor;
 import at.aau.course.extractor.GrayScaleHistogram;
 import at.aau.course.extractor.HSVExtractor;
 import at.aau.course.extractor.IDescriptorWrapper;
-import at.aau.course.ui.Phys.PhysicsModelThread;
+import at.aau.course.ui.particle_physics.PhysicsModelThread;
 
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
 import java.awt.BorderLayout;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import physics_model.PhysicsModel;
+import at.aau.course.physics_model.PhysicsModel;
 
 public class ApplicationFrame extends javax.swing.JFrame {
 
@@ -67,6 +61,8 @@ public class ApplicationFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        buttonGroup2 = new javax.swing.ButtonGroup();
         UI_PanelDescriptorsGeneration = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         UI_descriptorsList = new javax.swing.JList();
@@ -90,6 +86,13 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_2ndFeatureExtractorShowButton = new javax.swing.JButton();
         jScrollPane4 = new javax.swing.JScrollPane();
         UI_2ndFeatureDescriptorImagePanel = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        UI_2ndDescriptorPanelRangeTextField = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        UI_2ndDescriptorPanelCountSpinner = new javax.swing.JSpinner();
+        jLabel9 = new javax.swing.JLabel();
+        UI_2ndDescriptorPanelRangeRadioButton = new javax.swing.JRadioButton();
+        UI_2ndDescriptorPanelCountRadioButton = new javax.swing.JRadioButton();
         UI_1stFeatureDescriptorPanel = new javax.swing.JPanel();
         UI_1stFeatureExtractorComboBox = new javax.swing.JComboBox();
         jSeparator3 = new javax.swing.JSeparator();
@@ -98,6 +101,13 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_1stFeatureExtractorShowButton = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         UI_1stFeatureDescriptorImagePanel = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        UI_1stDescriptorPanelRangeTextField = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        UI_1stDescriptorPanelRangeRadioButton = new javax.swing.JRadioButton();
+        UI_1stDescriptorPanelCountRadioButton = new javax.swing.JRadioButton();
+        jLabel6 = new javax.swing.JLabel();
+        UI_1stDescriptorPanelCountSpinner = new javax.swing.JSpinner();
         jSeparator2 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -194,7 +204,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(UI_chooseQueryObjectButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UI_QueryObjectPath, javax.swing.GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE)))
+                        .addComponent(UI_QueryObjectPath)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(UI_QueryObjectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(UI_addQueryObjectButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -243,6 +253,24 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_2ndFeatureDescriptorImagePanel.setLayout(new java.awt.GridLayout(1, 0));
         jScrollPane4.setViewportView(UI_2ndFeatureDescriptorImagePanel);
 
+        jLabel7.setText("Range:");
+
+        UI_2ndDescriptorPanelRangeTextField.setColumns(3);
+        UI_2ndDescriptorPanelRangeTextField.setText("3000");
+
+        jLabel8.setText("Count (kNN):");
+
+        UI_2ndDescriptorPanelCountSpinner.setValue((int)8);
+
+        jLabel9.setText("Lookup by:");
+
+        buttonGroup2.add(UI_2ndDescriptorPanelRangeRadioButton);
+        UI_2ndDescriptorPanelRangeRadioButton.setText("Range");
+
+        buttonGroup2.add(UI_2ndDescriptorPanelCountRadioButton);
+        UI_2ndDescriptorPanelCountRadioButton.setSelected(true);
+        UI_2ndDescriptorPanelCountRadioButton.setText("Count");
+
         javax.swing.GroupLayout UI_2ndFeatureDescriptorPanelLayout = new javax.swing.GroupLayout(UI_2ndFeatureDescriptorPanel);
         UI_2ndFeatureDescriptorPanel.setLayout(UI_2ndFeatureDescriptorPanelLayout);
         UI_2ndFeatureDescriptorPanelLayout.setHorizontalGroup(
@@ -254,6 +282,20 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_2ndLpNormComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_2ndDescriptorPanelRangeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_2ndDescriptorPanelCountSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_2ndDescriptorPanelRangeRadioButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_2ndDescriptorPanelCountRadioButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(UI_2ndFeatureExtractorShowButton)
                 .addGap(0, 0, Short.MAX_VALUE))
             .addComponent(jScrollPane4)
@@ -265,7 +307,14 @@ public class ApplicationFrame extends javax.swing.JFrame {
                     .addComponent(UI_2ndFeatureExtractorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3)
                     .addComponent(UI_2ndLpNormComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(UI_2ndFeatureExtractorShowButton))
+                    .addComponent(UI_2ndFeatureExtractorShowButton)
+                    .addComponent(jLabel7)
+                    .addComponent(UI_2ndDescriptorPanelRangeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8)
+                    .addComponent(UI_2ndDescriptorPanelCountSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9)
+                    .addComponent(UI_2ndDescriptorPanelRangeRadioButton)
+                    .addComponent(UI_2ndDescriptorPanelCountRadioButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -294,6 +343,24 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_1stFeatureDescriptorImagePanel.setLayout(new java.awt.GridLayout(1, 0));
         jScrollPane3.setViewportView(UI_1stFeatureDescriptorImagePanel);
 
+        jLabel4.setText("Range:");
+
+        UI_1stDescriptorPanelRangeTextField.setColumns(3);
+        UI_1stDescriptorPanelRangeTextField.setText("3000");
+
+        jLabel5.setText("Count (kNN):");
+
+        buttonGroup1.add(UI_1stDescriptorPanelRangeRadioButton);
+        UI_1stDescriptorPanelRangeRadioButton.setText("Range");
+
+        buttonGroup1.add(UI_1stDescriptorPanelCountRadioButton);
+        UI_1stDescriptorPanelCountRadioButton.setSelected(true);
+        UI_1stDescriptorPanelCountRadioButton.setText("Count");
+
+        jLabel6.setText("Lookup by:");
+
+        UI_1stDescriptorPanelCountSpinner.setValue((int)8);
+
         javax.swing.GroupLayout UI_1stFeatureDescriptorPanelLayout = new javax.swing.GroupLayout(UI_1stFeatureDescriptorPanel);
         UI_1stFeatureDescriptorPanel.setLayout(UI_1stFeatureDescriptorPanelLayout);
         UI_1stFeatureDescriptorPanelLayout.setHorizontalGroup(
@@ -305,8 +372,22 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_1stLpNormComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_1stDescriptorPanelRangeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_1stDescriptorPanelCountSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_1stDescriptorPanelRangeRadioButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UI_1stDescriptorPanelCountRadioButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_1stFeatureExtractorShowButton)
-                .addGap(0, 333, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
             .addComponent(jSeparator3)
             .addComponent(jScrollPane3)
         );
@@ -317,7 +398,14 @@ public class ApplicationFrame extends javax.swing.JFrame {
                     .addComponent(UI_1stFeatureExtractorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
                     .addComponent(UI_1stLpNormComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(UI_1stFeatureExtractorShowButton))
+                    .addComponent(UI_1stFeatureExtractorShowButton)
+                    .addComponent(jLabel4)
+                    .addComponent(UI_1stDescriptorPanelRangeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5)
+                    .addComponent(UI_1stDescriptorPanelRangeRadioButton)
+                    .addComponent(UI_1stDescriptorPanelCountRadioButton)
+                    .addComponent(jLabel6)
+                    .addComponent(UI_1stDescriptorPanelCountSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -476,12 +564,17 @@ public class ApplicationFrame extends javax.swing.JFrame {
             List<File> queryObjectsFile = new ArrayList<File>();
             queryObjectsFile.add(queryObjectFile);
 
-            RankedResult[] results = newRankingTask.computeForQueryObjects(queryObjectsFile, extractorFileName, LpNorm);
+            RankedResult[] results = null;
+            if (this.UI_1stDescriptorPanelCountRadioButton.isSelected()) {
+                //this.UI_1stDescriptorPanelCountSpinner.getValue();
+                results = newRankingTask.searchForSimilarQueryObjectsBykNN(queryObjectsFile, extractorFileName, LpNorm, (int) this.UI_1stDescriptorPanelCountSpinner.getValue());
+            } else {
+                results = newRankingTask.searchForSimilarQueryObjectsByRange(queryObjectsFile, extractorFileName, LpNorm, Double.parseDouble(UI_1stDescriptorPanelRangeTextField.getText()));
+            }
 
-            System.out.println("--->" + results.length);
-            System.out.println(UI_1stFeatureDescriptorImagePanel.getComponentCount());
-
-            for (int i = 0; i < 10; i++) {
+            //System.out.println("--->" + results.length);
+            //System.out.println(UI_1stFeatureDescriptorImagePanel.getComponentCount());
+            for (int i = 0; i < results.length; i++) {
                 RankedResult rankedResult = results[i];
 
                 File rankedResultFile = new File(
@@ -496,7 +589,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
                     continue;
                 }
 
-                System.out.println("Rendering file " + rankedResultFile.getAbsolutePath());
+                System.out.println("Rendering file " + rankedResultFile.getAbsolutePath() + " with a distance " + rankedResult.getDistance());
 
                 BufferedImage myPicture = ImageIO.read(rankedResultFile);
                 JLabel picLabel = new JLabel(new ImageIcon(myPicture));
@@ -506,8 +599,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
             this.validate();
             this.repaint();
-            //UI_1stFeatureDescriptorImagePanel
-            JOptionPane.showMessageDialog(this, "Finished!");
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
             ex.printStackTrace();
@@ -536,12 +628,18 @@ public class ApplicationFrame extends javax.swing.JFrame {
             List<File> queryObjectsFile = new ArrayList<File>();
             queryObjectsFile.add(queryObjectFile);
 
-            RankedResult[] results = newRankingTask.computeForQueryObjects(queryObjectsFile, extractorFileName, LpNorm);
+            RankedResult[] results = null;
+
+            if (this.UI_2ndDescriptorPanelCountRadioButton.isSelected()) {
+                //this.UI_1stDescriptorPanelCountSpinner.getValue();
+                results = newRankingTask.searchForSimilarQueryObjectsBykNN(queryObjectsFile, extractorFileName, LpNorm, (int) this.UI_2ndDescriptorPanelCountSpinner.getValue());
+            } else {
+                results = newRankingTask.searchForSimilarQueryObjectsByRange(queryObjectsFile, extractorFileName, LpNorm, Double.parseDouble(UI_2ndDescriptorPanelRangeTextField.getText()));
+            }
 
             System.out.println("--->" + results.length);
-            System.out.println(UI_2ndFeatureDescriptorImagePanel.getComponentCount());
-
-            for (int i = 0; i < 10; i++) {
+            //System.out.println(UI_2ndFeatureDescriptorImagePanel.getComponentCount());
+            for (int i = 0; i < results.length; i++) {
                 RankedResult rankedResult = results[i];
 
                 File rankedResultFile = new File(
@@ -556,7 +654,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
                     continue;
                 }
 
-                System.out.println("Rendering file " + rankedResultFile.getAbsolutePath());
+                System.out.println("Rendering file " + rankedResultFile.getAbsolutePath() + " with a distance " + rankedResult.getDistance());
 
                 BufferedImage myPicture = ImageIO.read(rankedResultFile);
                 JLabel picLabel = new JLabel(new ImageIcon(myPicture));
@@ -566,8 +664,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
             this.validate();
             this.repaint();
-            //UI_1stFeatureDescriptorImagePanel
-            JOptionPane.showMessageDialog(this, "Finished!");
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
             ex.printStackTrace();
@@ -585,10 +682,9 @@ public class ApplicationFrame extends javax.swing.JFrame {
 //        physicsModel.setWidthBound(1280);
 //        physicsModel.setHeightBound(800);
         physicsModel.setWidthBound(1280);
-        physicsModel.setHeightBound(800);        
-        
-        //IDistance distance = new LpNorm(2);
+        physicsModel.setHeightBound(800);
 
+        //IDistance distance = new LpNorm(2);
         VectorData[] objectsPerFeature = null;
 
         List<VectorData> vectorDataAsList = new ArrayList<VectorData>();
@@ -600,7 +696,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
         objectsPerFeature = vectorDataAsList.toArray(new VectorData[vectorDataAsList.size()]);
 
         //Point[] coordinates = physicsModel.computeCoordinates(distance, objectsPerFeature);
-
         try {
             //new PhysicsModelUI( coordinates, objectsPerFeature, this.epu.getInputDir() );
             //new Application(coordinates, objectsPerFeature, this.epu.getInputDir());
@@ -613,11 +708,19 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton UI_1stDescriptorPanelCountRadioButton;
+    private javax.swing.JSpinner UI_1stDescriptorPanelCountSpinner;
+    private javax.swing.JRadioButton UI_1stDescriptorPanelRangeRadioButton;
+    private javax.swing.JTextField UI_1stDescriptorPanelRangeTextField;
     private javax.swing.JPanel UI_1stFeatureDescriptorImagePanel;
     private javax.swing.JPanel UI_1stFeatureDescriptorPanel;
     private javax.swing.JComboBox UI_1stFeatureExtractorComboBox;
     private javax.swing.JButton UI_1stFeatureExtractorShowButton;
     private javax.swing.JComboBox UI_1stLpNormComboBox;
+    private javax.swing.JRadioButton UI_2ndDescriptorPanelCountRadioButton;
+    private javax.swing.JSpinner UI_2ndDescriptorPanelCountSpinner;
+    private javax.swing.JRadioButton UI_2ndDescriptorPanelRangeRadioButton;
+    private javax.swing.JTextField UI_2ndDescriptorPanelRangeTextField;
     private javax.swing.JPanel UI_2ndFeatureDescriptorImagePanel;
     private javax.swing.JPanel UI_2ndFeatureDescriptorPanel;
     private javax.swing.JComboBox UI_2ndFeatureExtractorComboBox;
@@ -635,9 +738,17 @@ public class ApplicationFrame extends javax.swing.JFrame {
     private javax.swing.JButton UI_addQueryObjectButton;
     private javax.swing.JButton UI_chooseQueryObjectButton;
     protected javax.swing.JList UI_descriptorsList;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;

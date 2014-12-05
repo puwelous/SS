@@ -178,10 +178,11 @@ public class Task {
         this.vectorDataMappedToDescriptors = mappedVectorDataToDescriptorName;
     }
 
-    public RankedResult[] computeForQueryObjects(
+    public RankedResult[] searchForSimilarQueryObjectsBykNN(
             List<File> queryObjectsAsFiles,
             String extractorFileName,
-            Double LpNorm
+            Double LpNorm,
+            int kNN
     ) {
 
         assert (!queryObjectsAsFiles.isEmpty());
@@ -189,9 +190,9 @@ public class Task {
         RankedResult[] rankedResults = null;
 
         // clear list
-        if( queryObjectsList == null ){
+        if (queryObjectsList == null) {
             queryObjectsList = new ArrayList<>();
-        }else{
+        } else {
             this.queryObjectsList.clear();
         }
         assert (queryObjectsList.isEmpty());
@@ -204,12 +205,49 @@ public class Task {
         List<VectorData> l_vectorDataPerDescriptor = this.vectorDataMappedToDescriptors.get(extractorFileName);
 
         DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
-                l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]),  // convert List->Array
+                l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]), // convert List->Array
                 new LpNorm(LpNorm)
         );
-        
+
         rankedResults = distanceSpaceLpNorm
-                .sortDBAccordingToQuery(queryObject);
+                .kNNQuery(queryObject, kNN);
+
+        return rankedResults;
+    }    
+    
+    public RankedResult[] searchForSimilarQueryObjectsByRange(
+            List<File> queryObjectsAsFiles,
+            String extractorFileName,
+            Double LpNorm,
+            double range
+    ) {
+
+        assert (!queryObjectsAsFiles.isEmpty());
+
+        RankedResult[] rankedResults = null;
+
+        // clear list
+        if (queryObjectsList == null) {
+            queryObjectsList = new ArrayList<>();
+        } else {
+            this.queryObjectsList.clear();
+        }
+        assert (queryObjectsList.isEmpty());
+        this.retrieveQueryObjectsByFiles(queryObjectsAsFiles);
+        assert (!queryObjectsList.isEmpty());
+
+        VectorData queryObject = this.queryObjectsList.get(0);
+
+        // VectorData for all images computed by @extractorFileName@ feature extractor
+        List<VectorData> l_vectorDataPerDescriptor = this.vectorDataMappedToDescriptors.get(extractorFileName);
+
+        DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
+                l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]), // convert List->Array
+                new LpNorm(LpNorm)
+        );
+
+        rankedResults = distanceSpaceLpNorm
+                .rangeQuery(queryObject, range);
 
         return rankedResults;
     }
@@ -358,7 +396,6 @@ public class Task {
             br.close();
 
             //System.out.println("Putting into " + iDescriptorWrapper.getFileName() + " List of a size " + listofVectorDataPerDesc.size());
-
             // add loaded vector data to a hashmap
             reloadedDataMappedToDescriptors.put(iDescriptorWrapper.getFileName(), listofVectorDataPerDesc);
         }

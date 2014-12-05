@@ -1,4 +1,4 @@
-package physics_model;
+package at.aau.course.physics_model;
 
 import at.aau.course.VectorData;
 import at.aau.course.distance.IDistance;
