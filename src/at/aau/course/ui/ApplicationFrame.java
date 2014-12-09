@@ -4,7 +4,6 @@ import at.aau.course.Task;
 import at.aau.course.VectorData;
 import at.aau.course.distance.IDistance;
 import at.aau.course.distance.LpNorm;
-import at.aau.course.distance_space.DistanceSpace;
 import at.aau.course.distance_space.RankedResult;
 import at.aau.course.extractor.EdgeExtractor;
 import at.aau.course.extractor.GrayScaleHistogram;
@@ -14,10 +13,13 @@ import at.aau.course.physics_model.PhysicsModel;
 import at.aau.course.ui.particle_physics.PhysicsModelThread;
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,8 +35,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-public class ApplicationFrame extends javax.swing.JFrame {
+public class ApplicationFrame extends javax.swing.JFrame implements MouseListener {
 
     EnvironmentPreparationUnit epu;
     DefaultListModel listModel;
@@ -65,6 +69,11 @@ public class ApplicationFrame extends javax.swing.JFrame {
         initLpNormComboBoxes(allLpNorms);
 
         listModel = (DefaultListModel) this.UI_QueryObjectsList.getModel();
+
+        initDisable();
+
+        //UI_descriptorsList.addListSelectionListener(this);
+        UI_descriptorsList.addMouseListener(this);
     }
 
     @SuppressWarnings("unchecked")
@@ -208,7 +217,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_ChooseQueryObjectLabel.setText("Query object:");
 
         UI_ActualQueryObjectLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        UI_ActualQueryObjectLabel.setText("Query object");
+        UI_ActualQueryObjectLabel.setText("Actual query object");
         UI_ActualQueryObjectLabel.setToolTipText("");
         UI_ActualQueryObjectLabel.setPreferredSize(new java.awt.Dimension(194, 146));
 
@@ -251,11 +260,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
         );
 
         UI_2ndFeatureExtractorComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        UI_2ndFeatureExtractorComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                UI_2ndFeatureExtractorComboBoxActionPerformed(evt);
-            }
-        });
 
         jLabel3.setText("LpNorm:");
 
@@ -317,8 +321,8 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_2ndDescriptorPanelCountRadioButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UI_2ndFeatureExtractorShowButton)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(UI_2ndFeatureExtractorShowButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(3, 3, 3))
             .addComponent(jScrollPane4)
         );
         UI_2ndFeatureDescriptorPanelLayout.setVerticalGroup(
@@ -342,11 +346,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
         );
 
         UI_1stFeatureExtractorComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        UI_1stFeatureExtractorComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                UI_1stFeatureExtractorComboBoxActionPerformed(evt);
-            }
-        });
 
         jLabel2.setText("LpNorm:");
 
@@ -407,8 +406,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_1stDescriptorPanelCountRadioButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UI_1stFeatureExtractorShowButton)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(UI_1stFeatureExtractorShowButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addComponent(jSeparator3)
             .addComponent(jScrollPane3)
         );
@@ -488,6 +486,10 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
             this.descriptsMapped2Name = newTask.getVectorDataMappedToDescriptors();
 
+            enableQuerySection();
+            UI_ComputeMapButton.setEnabled(true);
+            UI_ShowPhysicsModelButton.setEnabled(true);
+
             JOptionPane.showMessageDialog(this, "Descriptors generation finished!");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
@@ -517,8 +519,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
             System.out.println(descriptsMapped2Name.size());
 
             System.out.println("**************************");
-            
-            
+
             for (Map.Entry<String, List<VectorData>> entry : descriptsMapped2Name
                     .entrySet()) {
                 String key = entry.getKey();
@@ -528,20 +529,16 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 System.out.println("**************");
             }
 
+            enableQuerySection();
+            UI_ComputeMapButton.setEnabled(true);
+            UI_ShowPhysicsModelButton.setEnabled(true);
+
             JOptionPane.showMessageDialog(this, "Loading descriptors finished!");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
             ex.printStackTrace();
         }
     }//GEN-LAST:event_UI_LoadDescriptorsFromFileButtonActionPerformed
-
-    private void UI_1stFeatureExtractorComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UI_1stFeatureExtractorComboBoxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_UI_1stFeatureExtractorComboBoxActionPerformed
-
-    private void UI_2ndFeatureExtractorComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UI_2ndFeatureExtractorComboBoxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_UI_2ndFeatureExtractorComboBoxActionPerformed
 
     private void UI_addQueryObjectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UI_addQueryObjectButtonActionPerformed
         File selectedFile = new File(this.UI_QueryObjectPath.getText());
@@ -556,8 +553,17 @@ public class ApplicationFrame extends javax.swing.JFrame {
             BufferedImage queryObjectPicture;
             queryObjectPicture = ImageIO.read(selectedFile);
             UI_ActualQueryObjectLabel.setIcon(new ImageIcon(queryObjectPicture));
-            //this.UI_ActualQueryObjectLabel = new JLabel(new ImageIcon(queryObjectPicture));
-            //add(picLabel);
+
+            // enable UI
+            UI_1stFeatureDescriptorPanel.setEnabled(true);
+            for (Component c : UI_1stFeatureDescriptorPanel.getComponents()) {
+                c.setEnabled(true);
+            }
+
+            UI_2ndFeatureDescriptorPanel.setEnabled(true);
+            for (Component c : UI_2ndFeatureDescriptorPanel.getComponents()) {
+                c.setEnabled(true);
+            }
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "File " + selectedFile.getAbsolutePath() + " does not exist!");
         }
@@ -835,8 +841,9 @@ public class ApplicationFrame extends javax.swing.JFrame {
         System.out.println("Done!");
 
         JFrame frame = new JFrame();
+        frame.setTitle("Calculated average precisions");
         frame.add(scrollPane, BorderLayout.CENTER);
-        frame.setSize(300, 150);
+        frame.setSize(this.getWidth(), this.getHeight() / 2);
         frame.setVisible(true);
     }//GEN-LAST:event_UI_ComputeMapButtonActionPerformed
 
@@ -993,5 +1000,66 @@ public class ApplicationFrame extends javax.swing.JFrame {
             e.printStackTrace();
             return;
         }
+    }
+
+    private void initDisable() {
+        UI_ComputeMapButton.setEnabled(false);
+        UI_ShowPhysicsModelButton.setEnabled(false);
+        UI_QueryObjectPanel.setEnabled(false);
+
+        UI_GenerateDescriptorsButton.setEnabled(false);
+        UI_LoadDescriptorsFromFileButton.setEnabled(false);
+
+        for (Component c : UI_QueryObjectPanel.getComponents()) {
+            c.setEnabled(false);
+        }
+
+        UI_1stFeatureDescriptorPanel.setEnabled(false);
+        for (Component c : UI_1stFeatureDescriptorPanel.getComponents()) {
+            c.setEnabled(false);
+        }
+
+        UI_2ndFeatureDescriptorPanel.setEnabled(false);
+        for (Component c : UI_2ndFeatureDescriptorPanel.getComponents()) {
+            c.setEnabled(false);
+        }
+    }
+
+    private void enableQuerySection() {
+
+        UI_QueryObjectPanel.setEnabled(true);
+        for (Component c : UI_QueryObjectPanel.getComponents()) {
+            c.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent me) {
+        if (UI_descriptorsList.getSelectedValuesList().isEmpty()) {
+            this.initDisable();
+        } else {
+            UI_GenerateDescriptorsButton.setEnabled(true);
+            UI_LoadDescriptorsFromFileButton.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent me) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent me) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent me) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent me) {
+
     }
 }
