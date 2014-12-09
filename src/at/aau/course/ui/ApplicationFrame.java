@@ -5,6 +5,7 @@ import at.aau.course.VectorData;
 import at.aau.course.distance.IDistance;
 import at.aau.course.distance.LpNorm;
 import at.aau.course.distance_space.RankedResult;
+import at.aau.course.extractor.ColorHistogramLab;
 import at.aau.course.extractor.EdgeExtractor;
 import at.aau.course.extractor.GrayScaleHistogram;
 import at.aau.course.extractor.HSVExtractor;
@@ -948,6 +949,10 @@ public class ApplicationFrame extends javax.swing.JFrame implements MouseListene
                         quantinizations[i]));
             }
         }
+        
+        // adding Lab color extractor
+        extractors.add(new ColorHistogramLab());
+        
         return extractors;
     }
 
