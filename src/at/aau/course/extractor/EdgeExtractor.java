@@ -10,6 +10,18 @@ public class EdgeExtractor implements IDescriptorWrapper {
     private final int mult = 1;
     private final int threshold = 11;
 
+    final double sqrtTwo = Math.sqrt(2.0);
+    final double[] ver_edge_filter = new double[]{1.0, -1.0, 1.0, -1.0};
+    final double[] hor_edge_filter = new double[]{1.0, 1.0, -1.0, -1.0};
+    final double[] diag45_edge_filter = new double[]{sqrtTwo, 0, 0, -sqrtTwo};
+    final double[] diag135_edge_filter = new double[]{0, sqrtTwo, -sqrtTwo, 0};
+    final double[] nond_edge_filter = new double[]{2.0, -2.0, -2.0, 2.0};
+
+    private final int histogramSize = mult * mult * 5;
+
+    // (y / heightDiv) * mult * 5
+    final int yMultiplicator = mult * 5;
+
     public EdgeExtractor() {
     }
 
@@ -19,24 +31,22 @@ public class EdgeExtractor implements IDescriptorWrapper {
         final int imageWidth = image.getWidth();
         final int imageHeight = image.getHeight();
 
-        int widthDiv = (int) Math.ceil((double) image.getWidth() / mult);
-        int heightDiv = (int) Math.ceil((double) image.getHeight() / mult);
+        final int widthDiv = (int) Math.ceil((double) image.getWidth() / mult);
+        final int heightDiv = (int) Math.ceil((double) image.getHeight() / mult);
 
-        double[] histogram = new double[mult * mult * 5];
-        double sqrtTwo = Math.sqrt(2.0);
-        double[] ver_edge_filter = new double[]{1.0, -1.0, 1.0, -1.0};
-        double[] hor_edge_filter = new double[]{1.0, 1.0, -1.0, -1.0};
-        double[] diag45_edge_filter = new double[]{sqrtTwo, 0, 0, -sqrtTwo};
-        double[] diag135_edge_filter = new double[]{0, sqrtTwo, -sqrtTwo, 0};
-        double[] nond_edge_filter = new double[]{2.0, -2.0, -2.0, 2.0};
+        // (x / widthDiv) * 5
+        final double xAddition = (5 / widthDiv);
 
-        // verEdgeValue, horEdgeValue, diag45EdgeValue, diag135EdgeValue, nondEdgeValue
+        double[] histogram = new double[histogramSize];
+
+        // 5 types of edges
         double[] values = new double[5];
 
         //System.out.println("Image properties are: width = " + imageWidth + " and hight = " + imageHeight);
-        
         for (int y = 0; y < imageWidth - 1; ++y) {
             for (int x = 0; x < imageHeight - 1; ++x) {
+
+                // reset values
                 for (int v = 0; v < 5; ++v) {
                     values[v] = 0.0;
                 }
@@ -69,16 +79,17 @@ public class EdgeExtractor implements IDescriptorWrapper {
                 }
 
                 if (values[maxI] > threshold) {
-                    int histInd = (y / heightDiv) * mult * 5 + (x / widthDiv) * 5 + maxI;
+                    //int histInd = (y / heightDiv) * mult * 5 + (x / widthDiv) * 5 + maxI;
+                    int histInd = (y / heightDiv) * yMultiplicator + (int) (x * xAddition) + maxI;
                     histogram[histInd]++;
                 }
             }
         }
 
-        int imageCount = imageWidth * imageHeight;
+        final int pixelCount = imageWidth * imageHeight;
 
         for (int i = 0; i < histogram.length; ++i) {
-            histogram[i] /= imageCount;
+            histogram[i] /= pixelCount;
         }
 
         return histogram;
