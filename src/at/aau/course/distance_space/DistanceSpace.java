@@ -74,6 +74,7 @@ public class DistanceSpace {
 
         for (VectorData vectorData : descriptors) {
             MAP += avgPrecisionAsSum(vectorData);
+            System.out.println(System.currentTimeMillis());
         }
 
         return (MAP / descriptors.length);

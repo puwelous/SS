@@ -463,6 +463,8 @@ public class Task {
             // read file names from CSV files
 
             // find suitable descriptors in the array of all descriptors
+            
+            throw new IllegalArgumentException("Empty selectedQueryObjects array!");
         }
 
         DistanceSpace distanceSpace = new DistanceSpace(allDescriptors, iDistance);

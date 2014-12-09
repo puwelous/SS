@@ -2,60 +2,68 @@ package at.aau.course;
 
 import java.awt.image.BufferedImage;
 
-public class FeatureSignatureCalculator {
+public class FeatureSignatureExtractor {
 
-	final int NUMBER_OF_POINTS = 2000;
-	final int NUMBER_OF_SEEDS = 500;
-	final int ITERATION_COUNT = 5;
+    final int NUMBER_OF_POINTS = 2000;
+    final int NUMBER_OF_SEEDS = 500;
+    final int ITERATION_COUNT = 5;
 
-	SamplePoint[] points;
-	SamplePoint[] seeds;
+    SamplePoint[] points;
+    SamplePoint[] seeds;
 
-	BufferedImage image;
-	
-	//minimal weight = (numberofiteration * 3)
+    BufferedImage image;
 
-	public FeatureSignatureCalculator(BufferedImage image) {
-		this.image = image;
-	}
+    //minimal weight = (numberofiteration * 3)
+    public FeatureSignatureExtractor() {
 
-	public double extract(BufferedImage image) {
+    }
 
-		// initialize points
-		points = new SamplePoint[NUMBER_OF_POINTS];
+    public double extract(BufferedImage image) {
 
-		// initialize seeds
-		seeds = new SamplePoint[NUMBER_OF_SEEDS];
+        this.image = image;
 
-		// select points and seeds randomly
-		this.randomlySamplePointsAndSeeds();
+        // initialize points
+        points = new SamplePoint[NUMBER_OF_POINTS];
 
-		for (int i = 0; i < ITERATION_COUNT; i++) {
-			setSeedWeightsToZero();
-			//removeDuplicateSeeds(minimalDistance);
-			// AssignPointsToTheirClosestSeed()
-			// RemoveTooSmallSeeds(minimalWeight)
-			// RecomputeSeedCentersAndSetWeights()
-		}
+        // initialize seeds
+        seeds = new SamplePoint[NUMBER_OF_SEEDS];
 
-		// TODO
-		return 0.0;
-	}
+        // select points and seeds randomly
+        this.randomlySamplePointsAndSeeds();
 
-	private void randomlySamplePointsAndSeeds() {
+        for (int i = 0; i < ITERATION_COUNT; i++) {
+            setSeedWeightsToZero();
+            //removeDuplicateSeeds(minimalDistance);
+            // AssignPointsToTheirClosestSeed()
+            // RemoveTooSmallSeeds(minimalWeight)
+            // RecomputeSeedCentersAndSetWeights()
+        }
 
-		for (int i = 0; i < NUMBER_OF_POINTS; i++) {
-			
-			//TODO
-			//points[] = new SamplePoint();
-		}
-	}
+        // TODO
+        return 0.0;
+    }
 
-	private void setSeedWeightsToZero() {
-		// TODO use optimal way of doing it, Arrays. ArrayUtils or sth like that
-		for (int i = 0; i < NUMBER_OF_SEEDS; i++) {
-			seeds[i].weight = 0.0;
-		}
-	}
+    private void randomlySamplePointsAndSeeds() {
+
+        double x, y;
+        java.awt.Color c;
+
+        for (int i = 0; i < NUMBER_OF_POINTS; i++) {
+
+            x = Math.random() * this.image.getWidth();
+            y = Math.random() * this.image.getHeight();
+
+            c = new java.awt.Color(this.image.getRGB((int) x, (int) y));
+
+            points[i] = new SamplePoint(x, y, c);
+        }
+    }
+
+    private void setSeedWeightsToZero() {
+        // TODO use optimal way of doing it, Arrays. ArrayUtils or sth like that
+        for (int i = 0; i < NUMBER_OF_SEEDS; i++) {
+            seeds[i].weight = 0.0;
+        }
+    }
 
 }

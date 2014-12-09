@@ -15,8 +15,6 @@ import at.aau.course.ui.particle_physics.PhysicsModelThread;
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -36,8 +34,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 public class ApplicationFrame extends javax.swing.JFrame implements MouseListener {
 
@@ -807,7 +803,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements MouseListene
                     }
                 }
             }
-
+            
             System.out.println("selectedQueyObjects' size:" + selectedQueryObjects.size());
 
             for (int j = 1; (j < tableData[i].length); j++) { // skip first column, descriptor names have already been set!
@@ -825,6 +821,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements MouseListene
                 tableData[i][j] = avgPrecision;
 //                tableData[i][j] = 1.1;
 
+                System.out.println("Computed for j = " + j);
             }
 
             System.out.println(Arrays.toString(tableData[i]));

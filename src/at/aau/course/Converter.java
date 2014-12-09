@@ -11,6 +11,7 @@ public class Converter {
                 .getBlue() * 0.114));
     }
 
+    @Deprecated
     public static double[] RGBToLab(int R, int G, int B) {
 
         double[] values = new double[3];
@@ -42,6 +43,28 @@ public class Converter {
 
     private static double Fxyz(double t) {
         return ((t > 0.008856) ? Math.pow(t, (1.0 / 3.0)) : (7.787 * t + 16.0 / 116.0));
+    }
+
+    public static double[] RGBToLab(double[] rgb) {
+        double rLinear = rgb[0] / 255.0;
+        double gLinear = rgb[1] / 255.0;
+        double bLinear = rgb[2] / 255.0;
+
+        double rVal = rLinear > 0.04045 ? Math.pow((rLinear + 0.055) / (1.055), 2.2) : rLinear / 12.92;
+        double gVal = gLinear > 0.04045 ? Math.pow((gLinear + 0.055) / (1.055), 2.2) : gLinear / 12.92;
+        double bVal = bLinear > 0.04045 ? Math.pow((bLinear + 0.055) / (1.055), 2.2) : bLinear / 12.92;
+
+        //calculate lab
+        double xValue = 0.4124564 * rVal + 0.3575761 * rVal + 0.1804375 * rVal; //[0, 1]
+        double yValue = 0.2126729 * gVal + 0.7151522 * gVal + 0.0721750 * gVal; //[0, 1]
+        double zValue = 0.0193339 * bVal + 0.1191920 * bVal + 0.9503041 * bVal; //[0, 1]
+        xValue = xValue / 0.95; //[0, 1]
+        zValue = zValue / 1.09; //[0, 1]
+        double l = ((116 * yValue) - 16); //[-16, 100]
+        double a = (500 * (xValue - yValue)); //[-500, 500]
+        double b = (200 * (yValue - zValue)); //[-200, 200]
+        
+        return new double[]{ l, a, b};
     }
 
     public static double[] RGBtoHSV(int r, int g, int b) {

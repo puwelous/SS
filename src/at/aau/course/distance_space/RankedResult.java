@@ -27,14 +27,13 @@ public class RankedResult implements Comparable<RankedResult> {
 	}
 
 	public RankedResult(VectorData vectorData, double distance) {
-		super();
 		this.vectorData = vectorData;
 		this.distance = distance;
 	}
 
 	@Override
 	public int compareTo(RankedResult rr2) {
-		return (int) (this.getDistance() - rr2.getDistance());
+		return (int) (this.distance - rr2.distance);
 	}
 
 	public class RankedResultComparator implements Comparator<RankedResult> {
