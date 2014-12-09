@@ -69,7 +69,7 @@ public class VectorData implements Serializable {
 		
 		String dataArrayString = string.substring(indexOfThirdColon+2);
 		
-		 List<String> list = Arrays.asList(dataArrayString.substring(1, dataArrayString.length() - 1).split(", "));		
+		 List<String> list = Arrays.asList(dataArrayString.substring(0, dataArrayString.length() - 1).split(", "));		
 		
 		double[] result = new double[ list.size() ];
 		int i = 0;
@@ -131,5 +131,17 @@ public class VectorData implements Serializable {
      */
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+    
+    
+    public static void main(String[] args){
+        
+        String str = "0;1;1_r0.png;[15.0, 3.0, 7.0, 89.0, 169.0, 26.0, 24.0, 48.0, 1644.0, 1253.0, 323.0, 20.0, 889.0, 512.0, 479.0, 0.0, 97.0, 67.0, 248.0, 540.0, 7218.0, 99.0, 35.0, 4.0, 11521.0, 7.0, 0.0, 0.0, 1358.0, 0.0, 0.0, 0.0, 10.0, 4.0, 0.0, 0.0, 43.0, 0.0, 0.0, 0.0, 98.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 0.0, 0.0, 0.0, 33.0, 0.0, 1.0, 3.0, 1.0, 1.0, 17.0, 27.0, 0.0, 27.0, 313.0, 33.0]";
+        
+        VectorData vd = new VectorData();
+        vd.readFromString(str);
+        
+        System.out.println(vd.toString());
+        System.out.println(Arrays.toString(vd.data));
     }
 }

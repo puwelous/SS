@@ -1,5 +1,6 @@
 package at.aau.course;
 
+import at.aau.course.distance.IDistance;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,6 +25,7 @@ import at.aau.course.extractor.GrayScaleHistogram;
 import at.aau.course.extractor.IDescriptorWrapper;
 import at.aau.course.extractor.IExtractor;
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 
 public class Task {
@@ -157,7 +159,7 @@ public class Task {
                     actuallyComputedCount++;
                 }
             } else {
-                System.out.println("File " + directory.getName()
+                System.err.println("File " + directory.getName()
                         + " found but directory expected!");
             }
 
@@ -181,9 +183,9 @@ public class Task {
     public RankedResult[] searchForSimilarQueryObjectsBykNN(
             List<File> queryObjectsAsFiles,
             String extractorFileName,
-            Double LpNorm,
+            LpNorm LpNorm,
             int kNN
-    ) {
+    ) throws Exception {
 
         assert (!queryObjectsAsFiles.isEmpty());
 
@@ -196,7 +198,7 @@ public class Task {
             this.queryObjectsList.clear();
         }
         assert (queryObjectsList.isEmpty());
-        this.retrieveQueryObjectsByFiles(queryObjectsAsFiles);
+        this.retrieveQueryObjectsByFiles(queryObjectsAsFiles, extractorFileName);
         assert (!queryObjectsList.isEmpty());
 
         VectorData queryObject = this.queryObjectsList.get(0);
@@ -206,21 +208,21 @@ public class Task {
 
         DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
                 l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]), // convert List->Array
-                new LpNorm(LpNorm)
+                LpNorm
         );
 
         rankedResults = distanceSpaceLpNorm
                 .kNNQuery(queryObject, kNN);
 
         return rankedResults;
-    }    
-    
+    }
+
     public RankedResult[] searchForSimilarQueryObjectsByRange(
             List<File> queryObjectsAsFiles,
             String extractorFileName,
-            Double LpNorm,
+            LpNorm LpNorm,
             double range
-    ) {
+    ) throws Exception {
 
         assert (!queryObjectsAsFiles.isEmpty());
 
@@ -233,7 +235,7 @@ public class Task {
             this.queryObjectsList.clear();
         }
         assert (queryObjectsList.isEmpty());
-        this.retrieveQueryObjectsByFiles(queryObjectsAsFiles);
+        this.retrieveQueryObjectsByFiles(queryObjectsAsFiles, extractorFileName);
         assert (!queryObjectsList.isEmpty());
 
         VectorData queryObject = this.queryObjectsList.get(0);
@@ -243,7 +245,7 @@ public class Task {
 
         DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
                 l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]), // convert List->Array
-                new LpNorm(LpNorm)
+                LpNorm
         );
 
         rankedResults = distanceSpaceLpNorm
@@ -252,77 +254,76 @@ public class Task {
         return rankedResults;
     }
 
-    public RankedResult[] compute(List<File> queryObjectsAsFiles) throws Exception {
-
-        if (this.environment == null) {
-            throw new IllegalStateException("Environment has NOT been prepared yet!");
-        }
-
-        // compute or load descriptors
-        //vectorDataMappedToDescriptors = this.prepareVectorData();
-        this.retrieveQueryObjectsByFiles(queryObjectsAsFiles);
-
-        // take random query object:
-        VectorData queryObject = this.queryObjectsList.get(0);
-
-        System.out.println("'Randomly' selected query object: "
-                + queryObject.toString());
-
-        // calculating distances for histogram
-        double[] LpNormPValues = new double[]{1, 2, 5, 0.5};
-
-        RankedResult[] rankedResults = null;
-
-        VectorData[] a_vectorDataPerDescriptor;
-
-        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
-            String descriptorFileName = entry.getKey();
-            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
-
-            a_vectorDataPerDescriptor = l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]);
-
-            for (double LpNormValue : LpNormPValues) {
-
-                System.out.println("Computing the distance space for p value = "
-                        + LpNormValue + " and descriptor " + descriptorFileName);
-
-                // initialization
-                DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
-                        a_vectorDataPerDescriptor, new LpNorm(LpNormValue));
-
-                // calculation of distance space
-//                rankedResults = distanceSpaceLpNorm
-//                        .sortDBAccordingToQuery(queryObject);
-//                System.out.println(".....publishing results.....");
-//                this.publishResults(rankedResults, 10);
-//                System.out.println("............................");
-                double map = distanceSpaceLpNorm.computeMAP(new VectorData[]{queryObject});
-                System.out.println("ComputeMAP for p value = " + LpNormValue + " and single query object: " + queryObject.toString() + " is = " + map);
-
-                // pivot table
-                PivotTable pt = new PivotTable(new DistanceSpace(a_vectorDataPerDescriptor, new LpNorm(LpNormValue)));
-                if (false) {
-                    pt.create(a_vectorDataPerDescriptor);
-                    pt.save(this.environment.getPivotTableFile());
-                } else {
-                    pt.load(this.environment.getPivotTableFile());
-                    System.out.println(Arrays.deepToString(pt.getDistanceMatrix()));
-                }
-            }
-
-            // computing intrinsic dimensionality Lp = 2
-            DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
-                    a_vectorDataPerDescriptor, new LpNorm(2));
-            double iDim = distanceSpaceLpNorm.computeIntrinsicDimensionality();
-            System.out.println("iDim for descriptor " + descriptorFileName + ": " + iDim);
-
-        }
-
-        System.out.println("... done ...");
-
-        return rankedResults;
-    }
-
+//    public RankedResult[] compute(List<File> queryObjectsAsFiles) throws Exception {
+//
+//        if (this.environment == null) {
+//            throw new IllegalStateException("Environment has NOT been prepared yet!");
+//        }
+//
+//        // compute or load descriptors
+//        //vectorDataMappedToDescriptors = this.prepareVectorData();
+//        this.retrieveQueryObjectsByFiles(queryObjectsAsFiles);
+//
+//        // take random query object:
+//        VectorData queryObject = this.queryObjectsList.get(0);
+//
+//        System.out.println("'Randomly' selected query object: "
+//                + queryObject.toString());
+//
+//        // calculating distances for histogram
+//        double[] LpNormPValues = new double[]{1, 2, 5, 0.5};
+//
+//        RankedResult[] rankedResults = null;
+//
+//        VectorData[] a_vectorDataPerDescriptor;
+//
+//        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
+//            String descriptorFileName = entry.getKey();
+//            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
+//
+//            a_vectorDataPerDescriptor = l_vectorDataPerDescriptor.toArray(new VectorData[l_vectorDataPerDescriptor.size()]);
+//
+//            for (double LpNormValue : LpNormPValues) {
+//
+//                System.out.println("Computing the distance space for p value = "
+//                        + LpNormValue + " and descriptor " + descriptorFileName);
+//
+//                // initialization
+//                DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
+//                        a_vectorDataPerDescriptor, new LpNorm(LpNormValue));
+//
+//                // calculation of distance space
+////                rankedResults = distanceSpaceLpNorm
+////                        .sortDBAccordingToQuery(queryObject);
+////                System.out.println(".....publishing results.....");
+////                this.publishResults(rankedResults, 10);
+////                System.out.println("............................");
+//                double map = distanceSpaceLpNorm.computeMAP(new VectorData[]{queryObject});
+//                System.out.println("ComputeMAP for p value = " + LpNormValue + " and single query object: " + queryObject.toString() + " is = " + map);
+//
+//                // pivot table
+//                PivotTable pt = new PivotTable(new DistanceSpace(a_vectorDataPerDescriptor, new LpNorm(LpNormValue)));
+//                if (false) {
+//                    pt.create(a_vectorDataPerDescriptor);
+//                    pt.save(this.environment.getPivotTableFile());
+//                } else {
+//                    pt.load(this.environment.getPivotTableFile());
+//                    System.out.println(Arrays.deepToString(pt.getDistanceMatrix()));
+//                }
+//            }
+//
+//            // computing intrinsic dimensionality Lp = 2
+//            DistanceSpace distanceSpaceLpNorm = new DistanceSpace(
+//                    a_vectorDataPerDescriptor, new LpNorm(2));
+//            double iDim = distanceSpaceLpNorm.computeIntrinsicDimensionality();
+//            System.out.println("iDim for descriptor " + descriptorFileName + ": " + iDim);
+//
+//        }
+//
+//        System.out.println("... done ...");
+//
+//        return rankedResults;
+//    }
     private void publishResults(RankedResult[] rankedResults,
             int countOfPublishedResults) {
 
@@ -336,27 +337,6 @@ public class Task {
         }
     }
 
-//    private HashMap<String, List<VectorData>> prepareVectorData() throws IOException, Exception {
-//
-//        HashMap<String, List<VectorData>> loadedOrComputedVectorData = null;
-//
-//        if (this.isFileGenerationRequired) {
-//            System.out
-//                    .println("Descriptors generation has been initialized...");
-//            //loadedOrComputedVectorData = this.generateDescriptors();
-//            System.out.println("Descriptors generation has been finished...");
-//        } else {
-//            System.out.println("Reloading descriptors has been initialized...");
-//            loadedOrComputedVectorData = this.reloadDescriptors();
-//            System.out.println("Reloading descriptors has been finished...");
-//        }
-//
-//        System.out.println("****");
-//        System.err.println(loadedOrComputedVectorData.get("GrayScaleHistogram_1_4"));
-//        System.out.println("****");
-//
-//        return loadedOrComputedVectorData;
-//    }
     public void reloadDescriptors() throws IOException {
 
         // get the number of images processed in a file (let's assume the number has not
@@ -444,10 +424,91 @@ public class Task {
         }
     }
 
-//    public void addQueryObject(VectorData queryObject) {
-//        this.queryObjectsList.add(queryObject);
+//    /**
+//     * Computing mean average precision
+//     *
+//     * @param selectedQueryObjects query objects per a single similarity search
+//     * and computation relevance evaluation
+//     * @param allDescriptors whole image set described by descriptors
+//     */
+//    public void computeMapForAll(VectorData[] selectedQueryObjects, VectorData[] allDescriptors) {
+//
+//        if (selectedQueryObjects == null || selectedQueryObjects.length == 0) {
+//            // read file names from CSV files
+//
+//            // find suitable descriptors in the array of all descriptors
+//        }
+//
+//        DistanceSpace[] allDistanceSpaces = null;
+//
+//        for (int i = 0; i < allDistanceSpaces.length; i++) {
+//
+//            String distanceSpaceName = allDistanceSpaces[i].getDistance().getName();
+//            double avgPrecision = allDistanceSpaces[i].computeMAP(selectedQueryObjects);
+//
+//        }
 //    }
-    public void addQueryObject(File queryObjectAsFile) {
+    /**
+     * Computing mean average precision
+     *
+     * @param selectedQueryObjects query objects per a single similarity search
+     * and computation relevance evaluation
+     * @param allDescriptors whole image set described by descriptors
+     * @param iDistance distance computation interface
+     * @return Average precision.
+     */
+    public double computeMapForDistanceSpace(VectorData[] selectedQueryObjects, VectorData[] allDescriptors, IDistance iDistance) {
+
+        if (selectedQueryObjects == null || selectedQueryObjects.length == 0) {
+            // read file names from CSV files
+
+            // find suitable descriptors in the array of all descriptors
+        }
+
+        DistanceSpace distanceSpace = new DistanceSpace(allDescriptors, iDistance);
+
+        return distanceSpace.computeMAP(selectedQueryObjects);
+    }
+
+    public List<File> loadFilenamesFromCSV() throws FileNotFoundException, IOException {
+
+        List<File> loadedFileNames = new ArrayList<File>(1000);
+
+        BufferedReader br = new BufferedReader(new FileReader(
+                this.environment.getQueryObjectsCVSFile()));
+
+        File picturesDir = this.environment.getInputDir();
+
+        String readedLine;
+        File pictureDir, pictureFile;
+
+        while ((readedLine = br.readLine()) != null) {
+
+            String[] readedLineParsed = readedLine.split("\\\\");
+
+            pictureDir = new File(picturesDir, readedLineParsed[0]);
+
+            if (!pictureDir.exists()) {
+                System.err.println("Directory " + pictureDir.getAbsolutePath() + " does not exist!");
+                continue; // skip checking whether the file itself exist with a directory, continue with other entries
+            }
+
+            pictureFile = new File(pictureDir, readedLineParsed[1]);
+
+            if (!pictureFile.exists()) {
+                System.err.println("Image " + pictureFile.getAbsolutePath() + " does not exist!");
+                continue; // do not add!
+            }
+
+            loadedFileNames.add(pictureFile);
+        }
+
+        br.close();
+
+        return loadedFileNames;
+    }
+
+    public void addQueryObject(File queryObjectAsFile, String descriptorFileName) throws Exception {
 
         final int queryObjectClassId = Integer.parseInt(new File(queryObjectAsFile.getParent()).getName());
         final String queryObjectFileName = queryObjectAsFile.getName();
@@ -458,19 +519,21 @@ public class Task {
         queryObjectByFile.setClassId(queryObjectClassId);
         queryObjectByFile.setFileName(queryObjectFileName);
 
-        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
-            //String descriptorFileName = entry.getKey();
-            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
-            int indexOfFound = l_vectorDataPerDescriptor.indexOf(queryObjectByFile);
-            if (indexOfFound == -1) {
-                // found
-                continue;
-            }
-            queryObjectReferenced = l_vectorDataPerDescriptor.get(indexOfFound);
-            if (!queryObjectsList.contains(queryObjectReferenced)) {
-                this.queryObjectsList.add(queryObjectReferenced);
-            }
+        List<VectorData> l_vectorDataPerDescriptor = vectorDataMappedToDescriptors.get(descriptorFileName);
+
+//        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
+        //String descriptorFileName = entry.getKey();
+//            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
+        int indexOfFound = l_vectorDataPerDescriptor.indexOf(queryObjectByFile);
+        if (indexOfFound == -1) {
+            // found
+            throw new Exception("Query object not found among generated image descriptors!");
         }
+        queryObjectReferenced = l_vectorDataPerDescriptor.get(indexOfFound);
+        if (!queryObjectsList.contains(queryObjectReferenced)) {
+            this.queryObjectsList.add(queryObjectReferenced);
+        }
+//        }
 
 //        for (VectorData generatedVectorData : vectorDataArray) {
 //
@@ -492,14 +555,15 @@ public class Task {
         this.environment = epu;
     }
 
-    private void retrieveQueryObjectsByFiles(List<File> queryObjectsAsFiles) {
+    private void retrieveQueryObjectsByFiles(List<File> queryObjectsAsFiles, String descFileName) throws Exception {
 
 //        for (Map.Entry<String, List<VectorData>> entry : vectorDataMappedToDescriptors.entrySet()) {
 //            String descriptorFileName = entry.getKey();
 //            List<VectorData> l_vectorDataPerDescriptor = entry.getValue();
 //        }
         for (File queryObjectsAsFile : queryObjectsAsFiles) {
-            this.addQueryObject(queryObjectsAsFile);
+            System.out.println(queryObjectsAsFile.getAbsoluteFile());
+            this.addQueryObject(queryObjectsAsFile, descFileName);
         }
     }
 

@@ -47,6 +47,12 @@ public class DistanceSpace {
                             dataDescriptors[i], distance.compute(query, dataDescriptors[i])
                     )
             );
+            
+//            if( query.getFileName().equalsIgnoreCase(dataDescriptors[i].getFileName()) ){
+//                System.out.println("Computed distance is " + distance.compute(query, dataDescriptors[i]));
+//                System.out.println("Query data is :" +  Arrays.toString( query.getData() ) );
+//                System.out.println("Descriptor data is :" +  Arrays.toString(dataDescriptors[i].getData()) );
+//            }
         }
 
         // sort

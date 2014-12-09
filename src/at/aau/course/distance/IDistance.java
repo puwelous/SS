@@ -4,6 +4,8 @@ import at.aau.course.VectorData;
 
 public interface IDistance {
 
+        String getName();
+    
 	// per sets of doubles
 	double compute(VectorData x, VectorData y);
 	

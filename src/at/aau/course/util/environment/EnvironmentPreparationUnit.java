@@ -1,10 +1,11 @@
 package at.aau.course.util.environment;
 
+import at.aau.course.extractor.IDescriptorWrapper;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import at.aau.course.extractor.IDescriptorWrapper;
 
 public class EnvironmentPreparationUnit {
 
@@ -61,7 +62,9 @@ public class EnvironmentPreparationUnit {
             }
         }
 
-        //System.out.println("prepareEnvironment() " + VECTOR_DATA_FILES.size() );
+        if( !QUERY_OBJECTS_CSV_FILE.exists() ){
+            System.err.println("CSV file " + QUERY_OBJECTS_CSV_FILE.getAbsolutePath() + " not found during environment preparation!");
+        }
     }
 
     public File getInputDir() {
@@ -101,4 +104,5 @@ public class EnvironmentPreparationUnit {
 
         return count;
     }
+   
 }

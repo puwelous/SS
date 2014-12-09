@@ -2,19 +2,25 @@ package at.aau.course.ui;
 
 import at.aau.course.Task;
 import at.aau.course.VectorData;
+import at.aau.course.distance.IDistance;
+import at.aau.course.distance.LpNorm;
+import at.aau.course.distance_space.DistanceSpace;
 import at.aau.course.distance_space.RankedResult;
 import at.aau.course.extractor.EdgeExtractor;
 import at.aau.course.extractor.GrayScaleHistogram;
 import at.aau.course.extractor.HSVExtractor;
 import at.aau.course.extractor.IDescriptorWrapper;
+import at.aau.course.physics_model.PhysicsModel;
 import at.aau.course.ui.particle_physics.PhysicsModelThread;
-
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
 import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,15 +28,19 @@ import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import at.aau.course.physics_model.PhysicsModel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 public class ApplicationFrame extends javax.swing.JFrame {
 
     EnvironmentPreparationUnit epu;
     DefaultListModel listModel;
     final JFileChooser fc;
+    List<IDescriptorWrapper> extractors;
+    LpNorm[] allLpNorms;
 
     HashMap<String, List<VectorData>> descriptsMapped2Name = null;
 
@@ -42,9 +52,9 @@ public class ApplicationFrame extends javax.swing.JFrame {
         // query objects
         List<File> queryObjects = initQueryObjects();
         // extractors
-        List<IDescriptorWrapper> extractors = initDescriptors();
+        extractors = initDescriptors();
         //LpNorm
-        Double[] LpNorm = initLpNorm();
+        allLpNorms = initLpNorm();
 
         //*********** UI *************
         initComponents();
@@ -52,7 +62,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
         //initQueryObjectsList(queryObjects);
         initAllDescriptorsLists(extractors);
         initDescriptorsComboBoxes(extractors);
-        initLpNormComboBoxes(LpNorm);
+        initLpNormComboBoxes(allLpNorms);
 
         listModel = (DefaultListModel) this.UI_QueryObjectsList.getModel();
     }
@@ -70,6 +80,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
         UI_GenerateDescriptorsButton = new javax.swing.JButton();
         UI_LoadDescriptorsFromFileButton = new javax.swing.JButton();
         UI_ShowPhysicsModelButton = new javax.swing.JButton();
+        UI_ComputeMapButton = new javax.swing.JButton();
         UI_QueryObjectPanel = new javax.swing.JPanel();
         UI_QueryObjectPath = new javax.swing.JTextField();
         UI_chooseQueryObjectButton = new javax.swing.JButton();
@@ -138,6 +149,13 @@ public class ApplicationFrame extends javax.swing.JFrame {
             }
         });
 
+        UI_ComputeMapButton.setText("Compute AVG precision");
+        UI_ComputeMapButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UI_ComputeMapButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout UI_PanelDescriptorsGenerationLayout = new javax.swing.GroupLayout(UI_PanelDescriptorsGeneration);
         UI_PanelDescriptorsGeneration.setLayout(UI_PanelDescriptorsGenerationLayout);
         UI_PanelDescriptorsGenerationLayout.setHorizontalGroup(
@@ -149,6 +167,8 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(UI_LoadDescriptorsFromFileButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(UI_ComputeMapButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(UI_ShowPhysicsModelButton))
             .addComponent(jScrollPane1)
         );
@@ -159,7 +179,8 @@ public class ApplicationFrame extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(UI_GenerateDescriptorsButton)
                     .addComponent(UI_LoadDescriptorsFromFileButton)
-                    .addComponent(UI_ShowPhysicsModelButton))
+                    .addComponent(UI_ShowPhysicsModelButton)
+                    .addComponent(UI_ComputeMapButton))
                 .addGap(3, 3, 3)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
@@ -492,6 +513,21 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
             this.descriptsMapped2Name = newTask.getVectorDataMappedToDescriptors();
 
+            System.out.print("Size: ");
+            System.out.println(descriptsMapped2Name.size());
+
+            System.out.println("**************************");
+            
+            
+            for (Map.Entry<String, List<VectorData>> entry : descriptsMapped2Name
+                    .entrySet()) {
+                String key = entry.getKey();
+                List<VectorData> list = entry.getValue();
+                System.out.println("Key: " + key);
+                System.out.println("List size: " + list.size());
+                System.out.println("**************");
+            }
+
             JOptionPane.showMessageDialog(this, "Loading descriptors finished!");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
@@ -557,7 +593,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
             Task newRankingTask = new Task();
             newRankingTask.setVectorDataMappedToDescriptors(this.descriptsMapped2Name);
 
-            Double LpNorm = (Double) this.UI_1stLpNormComboBox.getSelectedItem();
+            LpNorm LpNorm = new LpNorm((double) this.UI_1stLpNormComboBox.getSelectedItem());
             String extractorFileName = ((IDescriptorWrapper) this.UI_1stFeatureExtractorComboBox.getSelectedItem()).getFileName();
             File queryObjectFile = (File) this.listModel.elementAt(this.UI_QueryObjectsList.getSelectedIndex());
 
@@ -572,8 +608,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 results = newRankingTask.searchForSimilarQueryObjectsByRange(queryObjectsFile, extractorFileName, LpNorm, Double.parseDouble(UI_1stDescriptorPanelRangeTextField.getText()));
             }
 
-            //System.out.println("--->" + results.length);
-            //System.out.println(UI_1stFeatureDescriptorImagePanel.getComponentCount());
             for (int i = 0; i < results.length; i++) {
                 RankedResult rankedResult = results[i];
 
@@ -585,6 +619,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
                 );
 
                 if (!rankedResultFile.exists()) {
+                    System.out.println("Ranked file " + rankedResultFile.getAbsolutePath() + " does not exist! ");
                     i--;
                     continue;
                 }
@@ -621,7 +656,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
             Task newRankingTask = new Task();
             newRankingTask.setVectorDataMappedToDescriptors(this.descriptsMapped2Name);
 
-            Double LpNorm = (Double) this.UI_2ndLpNormComboBox.getSelectedItem();
+            LpNorm LpNorm = new LpNorm((double) this.UI_2ndLpNormComboBox.getSelectedItem());
             String extractorFileName = ((IDescriptorWrapper) this.UI_2ndFeatureExtractorComboBox.getSelectedItem()).getFileName();
             File queryObjectFile = (File) this.listModel.elementAt(this.UI_QueryObjectsList.getSelectedIndex());
 
@@ -680,7 +715,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
 
         PhysicsModel physicsModel = new PhysicsModel();
 //        physicsModel.setWidthBound(1280);
-//        physicsModel.setHeightBound(800);
+//      TODO: automatic full screen:
         physicsModel.setWidthBound(1280);
         physicsModel.setHeightBound(800);
 
@@ -706,6 +741,105 @@ public class ApplicationFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_UI_ShowPhysicsModelButtonActionPerformed
 
+    private void UI_ComputeMapButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UI_ComputeMapButtonActionPerformed
+
+        if (this.descriptsMapped2Name == null || this.descriptsMapped2Name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No feature extractor (descriptor) selected!");
+            return;
+        }
+
+        Object[][] tableData = null;
+        String[] columnNames = null;
+        int actualIndex;
+        List<VectorData> selectedQueryObjects;
+
+        tableData = new Object[descriptsMapped2Name.size()][allLpNorms.length + 1];
+
+        columnNames = new String[this.allLpNorms.length + 1]; // "MAP" + all feature extraction techniques
+
+        // load list of files to put into a query selection
+        Task loadCVFileTask = new Task();
+        List<File> loadedFiles;
+        try {
+            loadCVFileTask.setEnvironment(this.epu);
+            loadedFiles = loadCVFileTask.loadFilenamesFromCSV();
+            if (loadedFiles.isEmpty()) {
+                throw new Exception("CSV file contains no entries???");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getLocalizedMessage());
+            return;
+        }
+
+        // initialize column names
+        columnNames[0] = "MAP";
+        for (int cnindex = 1; cnindex < columnNames.length; cnindex++) {
+            columnNames[cnindex] = this.allLpNorms[cnindex - 1].getName();
+        }
+
+        // initialize whole first column:
+        actualIndex = 0;
+        for (Map.Entry<String, List<VectorData>> entry : descriptsMapped2Name.entrySet()) {
+            String descriptorFileName = entry.getKey();
+            tableData[actualIndex][0] = descriptorFileName;
+            actualIndex++;
+        }
+        System.out.println("actualIndex:" + actualIndex);
+        for (int i = 0; i < tableData.length; i++) {
+
+            System.out.println("tableData[i][0]:" + tableData[i][0]);
+            List<VectorData> l_allVectorsPerDesc = descriptsMapped2Name.get(tableData[i][0]);
+
+            //TODO: conversion of list of files to calculated or loaded VectorData[]
+            selectedQueryObjects = new ArrayList<VectorData>(loadedFiles.size());
+            for (File queryFile : loadedFiles) {
+                for (VectorData singleQuery : l_allVectorsPerDesc) {
+                    if (queryFile.getName().equalsIgnoreCase(singleQuery.getFileName())) {
+                        selectedQueryObjects.add(singleQuery);
+                        break;
+                    }
+                }
+            }
+
+            System.out.println("selectedQueyObjects' size:" + selectedQueryObjects.size());
+
+            for (int j = 1; (j < tableData[i].length); j++) { // skip first column, descriptor names have already been set!
+
+                IDistance iDistance = (IDistance) this.allLpNorms[j - 1]; // starting with index 1 but 1st LpNorm is on index 0
+                final double avgPrecision;
+
+                Task avgPrecisionTask = new Task();
+                avgPrecisionTask.setEnvironment(this.epu);
+
+                avgPrecision = new Task().computeMapForDistanceSpace(
+                        selectedQueryObjects.toArray(new VectorData[selectedQueryObjects.size()]),
+                        l_allVectorsPerDesc.toArray(new VectorData[l_allVectorsPerDesc.size()]),
+                        iDistance);
+                tableData[i][j] = avgPrecision;
+//                tableData[i][j] = 1.1;
+
+            }
+
+            System.out.println(Arrays.toString(tableData[i]));
+
+            selectedQueryObjects = null;
+        }
+
+//        for (DistanceSpace distanceSpace : allDistanceSpaces) {
+//            
+//        }
+        JTable table = new JTable(tableData, columnNames);
+        JScrollPane scrollPane = new JScrollPane(table);
+        table.setFillsViewportHeight(true);
+
+        System.out.println("Done!");
+
+        JFrame frame = new JFrame();
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.setSize(300, 150);
+        frame.setVisible(true);
+    }//GEN-LAST:event_UI_ComputeMapButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton UI_1stDescriptorPanelCountRadioButton;
@@ -728,6 +862,7 @@ public class ApplicationFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox UI_2ndLpNormComboBox;
     private javax.swing.JLabel UI_ActualQueryObjectLabel;
     private javax.swing.JLabel UI_ChooseQueryObjectLabel;
+    private javax.swing.JButton UI_ComputeMapButton;
     private javax.swing.JButton UI_GenerateDescriptorsButton;
     private javax.swing.JButton UI_LoadDescriptorsFromFileButton;
     private javax.swing.JPanel UI_PanelDescriptorsGeneration;
@@ -806,7 +941,6 @@ public class ApplicationFrame extends javax.swing.JFrame {
                         quantinizations[i]));
             }
         }
-
         return extractors;
     }
 
@@ -825,17 +959,39 @@ public class ApplicationFrame extends javax.swing.JFrame {
         );
     }
 
-    private Double[] initLpNorm() {
-        return new Double[]{
-            (double) 1, (double) 2, (double) 5, 0.5};
+    private LpNorm[] initLpNorm() {
+
+        return new LpNorm[]{
+            new LpNorm(1.0), new LpNorm(2.0), new LpNorm(5.0), new LpNorm(0.5)};
     }
 
-    private void initLpNormComboBoxes(Double[] LpNorms) {
+    private void initLpNormComboBoxes(LpNorm[] LpNorms) {
+
+        Double[] LpNormValues = new Double[LpNorms.length];
+
+        for (int i = 0; i < LpNormValues.length; i++) {
+            LpNormValues[i] = LpNorms[i].getP();
+        }
+
         UI_1stLpNormComboBox.setModel(
-                new javax.swing.DefaultComboBoxModel(LpNorms)
+                new javax.swing.DefaultComboBoxModel(LpNormValues)
         );
         UI_2ndLpNormComboBox.setModel(
-                new javax.swing.DefaultComboBoxModel(LpNorms)
+                new javax.swing.DefaultComboBoxModel(LpNormValues)
         );
+    }
+
+    public static void main(String[] args) {
+        ApplicationFrame af = new ApplicationFrame();
+        Task loadCVFileTask = new Task();
+        loadCVFileTask.setEnvironment(af.epu);
+
+        try {
+            List<File> loadedFiles = loadCVFileTask.loadFilenamesFromCSV();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getLocalizedMessage());
+            e.printStackTrace();
+            return;
+        }
     }
 }

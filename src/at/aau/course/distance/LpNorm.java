@@ -46,4 +46,9 @@ public class LpNorm implements IDistance {
 	public void setP(double p) {
 		this.p = p;
 	}
+
+    @Override
+    public String getName() {
+        return this.getClass().getSimpleName() + "_" + p;
+    }
 }
