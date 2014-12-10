@@ -35,7 +35,7 @@ public class SamplePoint {
 
         double L2Distance = 0.0;
 
-        IDistance iDistance = new LpNorm(2);
+        IDistance iDistance = new LpNorm(2); // Euclidian distance
 
         L2Distance = iDistance.compute(getX(), comparedSp.getX());
 
@@ -51,6 +51,18 @@ public class SamplePoint {
     public double getY() {
         return dimensions[1];
     }
+    
+    public double getL(){
+        return dimensions[2];
+    }
+    
+    public double getA(){
+        return dimensions[3];
+    }
+    
+    public double getB(){
+        return dimensions[4];
+    }    
 
     public static void main(String[] args) {
 
