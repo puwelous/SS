@@ -803,7 +803,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements MouseListene
                     }
                 }
             }
-            
+
             System.out.println("selectedQueyObjects' size:" + selectedQueryObjects.size());
 
             for (int j = 1; (j < tableData[i].length); j++) { // skip first column, descriptor names have already been set!
@@ -906,12 +906,9 @@ public class ApplicationFrame extends javax.swing.JFrame implements MouseListene
 
         List<IDescriptorWrapper> extractors;
 
-        int[] quantinizations = new int[]{4, 8 /*, 16, 32, 64, 128 /*
-         * ,
-         * 256
-         */}; // bins
+        int[] quantinizations = new int[]{4, 8, 16, 32, 64, 128, 256}; // bins
 
-        int[] dimensions = new int[]{1, 2, /*3, 4 */}; // blocks expressed
+        int[] dimensions = new int[]{1, 2, 3, 4}; // blocks expressed
         // by
         // elements per
         // a row
@@ -946,10 +943,10 @@ public class ApplicationFrame extends javax.swing.JFrame implements MouseListene
                         quantinizations[i]));
             }
         }
-        
+
         // adding Lab color extractor
         extractors.add(new ColorHistogramLab());
-        
+
         return extractors;
     }
 
