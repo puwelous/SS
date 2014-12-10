@@ -1,5 +1,6 @@
-package at.aau.course;
+package at.aau.course.extractor;
 
+import at.aau.course.Converter;
 import java.awt.Color;
 
 import at.aau.course.distance.IDistance;

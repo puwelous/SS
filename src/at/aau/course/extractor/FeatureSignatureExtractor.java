@@ -1,7 +1,5 @@
-package at.aau.course;
+package at.aau.course.extractor;
 
-import at.aau.course.extractor.IDescriptorWrapper;
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FeatureSignatureExtractor implements IDescriptorWrapper{
+public class FeatureSignatureExtractor implements IDescriptorWrapper {
 
-    final String fileName = getClass().getSimpleName();
-    
+    private final String name = getClass().getSimpleName();
+
     final int NUMBER_OF_POINTS = 2000;
     final int NUMBER_OF_SEEDS = 500;
     final int ITERATION_COUNT = 5;
@@ -25,10 +23,10 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
 
     BufferedImage image;
 
-    double minimalDistance = 5;
+    double minimalDistance = 10;
     double minimalWeight = 10;
 
-    HashMap<SamplePoint, List<SamplePoint>> pointsAssignedToSeeds = new HashMap<>(NUMBER_OF_SEEDS);
+    HashMap<SamplePoint, List<SamplePoint>> pointsAssignedToSeeds;
 
     //minimal weight = (numberofiteration * 3)
     public FeatureSignatureExtractor() {
@@ -39,7 +37,7 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
     public double[] extract(BufferedImage image) {
 
         double[] result;
-        
+
         this.image = image;
         this.imageWidth = image.getWidth();
         this.imageHeight = image.getHeight();
@@ -49,6 +47,8 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
 
         // initialize seeds
         seeds = new SamplePoint[NUMBER_OF_SEEDS];
+        
+        pointsAssignedToSeeds = new HashMap<>(NUMBER_OF_SEEDS);
 
         // select points and seeds randomly
         this.randomlySamplePointsAndSeeds();
@@ -61,21 +61,20 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
             recomputeSeedCentersAndSetWeights();
         }
 
-        
         result = new double[pointsAssignedToSeeds.size() * 6];
         int resultArrayIndex = 0;
-        
+
         for (Map.Entry<SamplePoint, List<SamplePoint>> entrySet : pointsAssignedToSeeds.entrySet()) {
             SamplePoint seed = entrySet.getKey();
             // w, x, y, L, a, b
-            result[ resultArrayIndex++ ] = seed.weight;
-            result[ resultArrayIndex++ ] = seed.getX();
-            result[ resultArrayIndex++ ] = seed.getY();
-            result[ resultArrayIndex++ ] = seed.getL();
-            result[ resultArrayIndex++ ] = seed.getA();
-            result[ resultArrayIndex++ ] = seed.getB();
+            result[resultArrayIndex++] = seed.weight;
+            result[resultArrayIndex++] = seed.getX();
+            result[resultArrayIndex++] = seed.getY();
+            result[resultArrayIndex++] = seed.getL();
+            result[resultArrayIndex++] = seed.getA();
+            result[resultArrayIndex++] = seed.getB();
         }
-        
+
         return result;
     }
 
@@ -123,8 +122,11 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
     }
 
     private void setSeedWeightsToZero() {
-        // TODO use optimal way of doing it, Arrays. ArrayUtils or sth like that
-        Arrays.fill(seeds, 0.0);
+        for (SamplePoint seed : seeds) {
+            if (seed != null) {
+                seed.weight = 0.0;
+            }
+        }
     }
 
     private void assignPointsToTheirClosestSeed() {
@@ -150,44 +152,50 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
                     distanceToClosestSeed = distance;
                     closestSeed = seed;
                 }
-
             }
 
             if (closestSeed != null) {
                 closestSeed.weight = closestSeed.weight + 1;
-                pointsAssignedToSeeds.get(closestSeed).add(point);
+                if (pointsAssignedToSeeds.containsKey(closestSeed)) {
+                    pointsAssignedToSeeds.get(closestSeed).add(point);
+                } else {
+                    ArrayList<SamplePoint> nal = new ArrayList<SamplePoint>();
+                    nal.add(point);
+                    pointsAssignedToSeeds.put(closestSeed, nal);
+                }
+
             }
-
         }
-
     }
 
     private void recomputeSeedCentersAndSetWeights() {
-        
+
         HashMap<SamplePoint, List<SamplePoint>> newPointsAssignedToSeeds = new HashMap<>(pointsAssignedToSeeds.size());
-        
+
         for (Map.Entry<SamplePoint, List<SamplePoint>> entrySet : pointsAssignedToSeeds.entrySet()) {
             SamplePoint seed = entrySet.getKey();
             List<SamplePoint> listOfAssignedPoints = entrySet.getValue();
-            
+
             int recomputedX = 0;
             int recomputedY = 0;
-            
+
             for (SamplePoint singleAssignedPoint : listOfAssignedPoints) {
                 recomputedX += singleAssignedPoint.getX();
                 recomputedY += singleAssignedPoint.getY();
             }
-            
+
             recomputedX = recomputedX / listOfAssignedPoints.size();
             recomputedY = recomputedY / listOfAssignedPoints.size();
-            
+
             SamplePoint newSeed = new SamplePoint(recomputedX, recomputedY, new java.awt.Color(image.getRGB(recomputedX, recomputedY)));
+
+            newSeed.weight = (double) listOfAssignedPoints.size();
             
             // remove old seed from hashmap
-            pointsAssignedToSeeds.remove(seed);
+            //pointsAssignedToSeeds.remove(seed);
             newPointsAssignedToSeeds.put(newSeed, listOfAssignedPoints);
         }
-        
+
         pointsAssignedToSeeds = newPointsAssignedToSeeds;
     }
 
@@ -227,8 +235,7 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
             }
         }
 
-        System.out.println("Removed seeds amount: " + removed);
-
+        //System.out.println("Removed seeds amount: " + removed);
     }
 
     private void removeTooSmallSeeds(double minimalWeight) {
@@ -248,18 +255,14 @@ public class FeatureSignatureExtractor implements IDescriptorWrapper{
         }
     }
 
-    public static void main(String... args) {
-
-        SamplePoint[] spA = new SamplePoint[]{new SamplePoint(1, 2, Color.red), new SamplePoint(12, 20, Color.BLACK)};
-
-        SamplePoint sp = spA[0];
-        sp = null;
-
-        System.out.println(spA[0]);
+    @Override
+    public String getFileName() {
+        return this.name + "_" + NUMBER_OF_POINTS + "_" + NUMBER_OF_SEEDS + "_" + ITERATION_COUNT + "_" + ((int)minimalDistance) + "_" + ((int)minimalWeight);
     }
 
     @Override
-    public String getFileName() {
-        return this.fileName;
+    public String toString() {
+        return "FeatureSignatureExtractor[" + "name=" + name + ", NUMBER_OF_POINTS=" + NUMBER_OF_POINTS + ", NUMBER_OF_SEEDS=" + NUMBER_OF_SEEDS + ", ITERATION_COUNT=" + ITERATION_COUNT + ", imageWidth=" + minimalDistance + ", minimalWeight=" + minimalWeight + ']';
     }
+
 }

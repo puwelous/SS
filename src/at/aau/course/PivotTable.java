@@ -1,6 +1,6 @@
 package at.aau.course;
 
-import at.aau.course.distance_space.DistanceSpace;
+import at.aau.course.distance.DistanceSpace;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;

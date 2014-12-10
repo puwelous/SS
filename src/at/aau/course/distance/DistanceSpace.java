@@ -1,4 +1,4 @@
-package at.aau.course.distance_space;
+package at.aau.course.distance;
 
 import at.aau.course.VectorData;
 import at.aau.course.distance.IDistance;

@@ -1,4 +1,4 @@
-package at.aau.course.distance_space;
+package at.aau.course.distance;
 
 import java.util.Comparator;
 

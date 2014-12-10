@@ -19,14 +19,13 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import at.aau.course.distance.LpNorm;
-import at.aau.course.distance_space.DistanceSpace;
-import at.aau.course.distance_space.RankedResult;
+import at.aau.course.distance.DistanceSpace;
+import at.aau.course.distance.RankedResult;
 import at.aau.course.extractor.GrayScaleHistogram;
 import at.aau.course.extractor.IDescriptorWrapper;
 import at.aau.course.extractor.IExtractor;
 import at.aau.course.util.environment.EnvironmentPreparationUnit;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 
 public class Task {
 
@@ -91,7 +90,9 @@ public class Task {
                 .getFileCountInDir(this.environment.getInputDir());
 
         // fileCount * (extractors) / 100 (%) + rounding
-        final int step = new BigDecimal((fileCount > 100 ? ((double) (fileCount * this.extractorsCount) / 100) : 1)).setScale(0, RoundingMode.CEILING).intValue();
+        final int step = new BigDecimal(
+                (fileCount > 100 ? ((double) (fileCount * this.extractorsCount) / 100) : 1)
+        ).setScale(0, RoundingMode.CEILING).intValue();
 
         File[] directories = this.environment.getInputDir().listFiles();
 
@@ -145,19 +146,20 @@ public class Task {
                         writerToWriteTo.write(vectorData.saveToString());
                         writerToWriteTo.newLine();
                         writerToWriteTo.flush();
-                        
+
                         System.gc();
+
+                        if (actuallyComputedCount % step == 0) {
+                            System.out.println("Complete: "
+                                    + (actuallyComputedCount / step) + "%");
+                        }
+                        actuallyComputedCount++;
                     }
-                    if (actuallyComputedCount % step == 0) {
-                        System.out.println("Complete: "
-                                + (actuallyComputedCount / step) + "%");
-                    }
+
                     pwOutDataMapping.println(classId + ";" + imageId + ";"
                             + directoryName + "/" + imageFile.getName());
                     pwOutDataMapping.flush();
-
                     imageId++;
-                    actuallyComputedCount++;
                 }
             } else {
                 System.err.println("File " + directory.getName()
@@ -165,6 +167,8 @@ public class Task {
             }
 
         }
+
+        System.out.println("Complete: 100%");
 
         // pwOutData.close();
         for (Map.Entry<String, BufferedWriter> entry : descriptorsMappedToWriters
@@ -464,7 +468,6 @@ public class Task {
             // read file names from CSV files
 
             // find suitable descriptors in the array of all descriptors
-            
             throw new IllegalArgumentException("Empty selectedQueryObjects array!");
         }
 
