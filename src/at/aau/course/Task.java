@@ -145,7 +145,8 @@ public class Task {
                         writerToWriteTo.write(vectorData.saveToString());
                         writerToWriteTo.newLine();
                         writerToWriteTo.flush();
-
+                        
+                        System.gc();
                     }
                     if (actuallyComputedCount % step == 0) {
                         System.out.println("Complete: "
